@@ -5,9 +5,6 @@
 target/
 build/
 
-# Large file
-mount/grafana/data/plugins/tdengine-datasource.tar
-
 # IntelliJ IDEA specific files
 .idea/
 *.iml
