@@ -1,0 +1,24 @@
+# Java class files
+*.class
+
+# Maven / Gradle files
+target/
+build/
+
+# Large file
+mount/grafana/data/plugins/tdengine-datasource.tar
+
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+.git/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+images/*.tar
