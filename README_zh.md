@@ -5,7 +5,7 @@
 ---
 
 ## 介绍
-supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项目，如 **Kong**、**Konga**、**Keycloak**、**Node-RED**、**EMQX**、**TDengine**、**TimescaleDB**、**MinIO**、**mcpclient** 和 **CopilotKit**。它旨在提供一个全面、模块化的解决方案，以支持现代 IIoT 应用的构建和部署。
+supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项目，如 **Kong**、**Konga**、**Keycloak**、**Node-RED**、**EMQX**、**TDengine**、**TimescaleDB**、**MinIO**、**McpClient** 和 **CopilotKit**。它旨在提供一个全面、模块化的解决方案，以支持现代 IIoT 应用的构建和部署。
 
 ## 平台架构
 
