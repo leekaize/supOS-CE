@@ -7,53 +7,20 @@
 ## Introduction
 supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **mcpclient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
 
-# Platform Architecture
 
-## Microservices Architecture
-Integrates various containers (e.g., backend, frontend, EMQX, Node-RED, etc.) to form a scalable and modular IIoT platform.
+## Platform Architecture
 
-## API Management with Kong & Konga
+### Core Components
 
-- **Kong**: Provides a high-performance, extensible, open-source API gateway.
-- **Konga**: A user-friendly UI for managing Kong configurations, monitoring services, and handling plugins.
-
-## Edge & IoT Data Handling
-
-- **EMQX**: MQTT broker for real-time data streaming and message management.
-- **Node-RED**: Low-code flow-based development tool for wiring IoT devices, APIs, and services.
-
-## Database & Time-Series Management
-
-- **PostgreSQL (TimescaleDB plugin)**: A time-series optimized database for industrial data.
-- **TDengine**: A specialized time-series database offering efficient data ingestion, processing, and queries.
-- **Chat2DB**: Provides an AI-assisted SQL interface for easier database exploration and querying.
-
-## Observability & Logging
-
-- **Elasticsearch & Filebeat**: Centralizes and indexes logs for real-time searching and analysis.
-- **Kibana**: Visualizes and analyzes data ingested into Elasticsearch, offering dashboards and logs for troubleshooting.
-
-## SCADA-Like Interfaces
-
-- **FUXA**: A flow-based and visual SCADA-like environment for controlling and monitoring industrial systems.
-
-## Analytics & Dashboarding
-
-- **Grafana**: Creates customized, real-time dashboards and data visualizations.
-
-## Single Sign-On (SSO) & Security
-
-- **Keycloak**: Centralized identity and access management, providing SSO, user federation, and more.
-
-## Object Storage
-
-- **MinIO**: High-performance, S3-compatible object storage solution with OpenID integration.
-
-## GraphQL Integration
-
-- **Hasura**: Offers instant, real-time GraphQL APIs on top of PostgreSQL/TimescaleDB for modern application development.
-
-
+- **Microservices Architecture**: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
+- **API Gateway & Management**: Uses **Kong** for API management and **Konga** for UI-based control.
+- **Edge & IoT Data Handling**: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
+- **Database & Time-Series Storage**: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
+- **Observability & Logging**: **Elasticsearch, Filebeat, and Kibana** for centralized logging and visualization.
+- **SCADA & Dashboards**: **FUXA** for SCADA-like monitoring, **Grafana** for customizable analytics.
+- **Security & Authentication**: **Keycloak** for centralized SSO and identity management.
+- **Object Storage**: **MinIO** as a high-performance, S3-compatible storage solution.
+- **GraphQL Integration**: **Hasura** for real-time GraphQL APIs on PostgreSQL/TimescaleDB.
 
 ---
 
