@@ -1,37 +1,49 @@
-# supos-ce-deploy
+# supOS: An Open-Source IIoT Platform
 
-#### 介绍
-部署工程
+[English](README.md) | [中文](README_zh.md)
 
-#### 软件架构
-软件架构说明
+---
 
+## Introduction
+supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **mcpclient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
 
-#### 安装教程
+## Features
+- **Microservices Architecture**: Uses multiple open-source services to enable a scalable, flexible platform.
+- **Secure Access**: With Keycloak, ensures centralized authentication.
+- **Data Processing**: Utilizes Node-RED and EMQX for IoT data ingestion and workflow orchestration.
+- **Time-Series Databases**: Incorporates TDengine and TimescaleDB for storing and querying massive time-series data.
+- **Storage Management**: Uses MinIO for object storage solutions.
+- **API Management**: Employs Kong and Konga for API gateway and management.
+- **Plugin Ecosystem**: Supports easy integration with external tools via mcpclient and CopilotKit.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+---
 
-#### 使用说明
+## Installation
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### 1. Linux
 
-#### 参与贡献
+#### 1.1 Operating Environment
+- **Operating System**: Currently tested on Ubuntu Server 24.04 with Docker. We welcome feedback on other OS distributions.
+- **Docker**: We assume you have Docker (with `docker compose` and `buildx`) installed. Our tested versions:
+  - Docker Engine - Community: 27.4.0
+  - Docker Buildx: v0.19.2
+  - Docker Compose: v2.31.0
+  - containerd: 1.7.24
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+If you don’t have Docker installed yet, our scripts can help set it up for Ubuntu Server 24.04. For other operating systems, please refer to the official Docker documentation.
 
+### 2. Usage
+1. **Clone the project**:
+   ```bash
+   git clone <this repo>
+   
+2. **Edit environment variables in the .env file**:
+- VOLUMES_PATH (directory for storing project data)
 
-#### 特技
+- ENTRANCE_DOMAIN (domain or IP address for frontend)
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+- Any other required variables per your environment
+
+3. **Start the project**:
+ ```bash
+bash bin/startup.sh
