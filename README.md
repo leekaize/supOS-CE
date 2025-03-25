@@ -80,7 +80,7 @@ If you don’t have Docker installed yet, our scripts can help set it up for Ubu
    - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
 
 5. **License**:
-   - This project is distributed under [LICENSE_NAME]. See LICENSE for details.
+   - This project is distributed under [LICENSE]. See LICENSE for details.
 
 6. **Contact**:
    - If you have questions, open an issue or email us.
