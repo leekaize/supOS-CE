@@ -34,19 +34,11 @@ supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项
   - Docker Buildx: v0.19.2
   - Docker Compose: v2.31.0
   - containerd: 1.7.24
-
-如果尚未安装 Docker，我们提供的脚本可以在 Ubuntu Server 24.04 上自动安装。其他操作系统请参考官方 Docker 文档。
-
-### 1.2 Windows
-
-#### 运行环境
-- 在 Windows 10 或 Windows 11 上安装最新版 **Docker Desktop** 和 **Git**。
-- 建议使用 **Git Bash** 进行所有操作。
-
-#### 使用方法
+  
+#### 1.2 使用方法
 1. **使用 Git Bash 克隆项目**：
    ```bash
-   git clone https://gitee.com/supos-community-edition/supos-ce-deploy.git --branch windows
+   git clone <this repo>
    ```
 2. **修改 `.env` 环境变量文件**：
    - 进入 `supos-ce-deploy` 目录，并编辑 `.env` 文件。
@@ -60,7 +52,15 @@ supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项
    ```
    - 运行后等待容器拉取和初始化，首次启动可能需要几分钟。
 
-### 2. 使用方法
+如果尚未安装 Docker，我们提供的脚本可以在 Ubuntu Server 24.04 上自动安装。其他操作系统请参考官方 Docker 文档。
+
+### 2. Windows
+
+#### 2.1 运行环境
+- 在 Windows 10 或 Windows 11 上安装最新版 **Docker Desktop** 和 **Git**。
+- 建议使用 **Git Bash** 进行所有操作。
+
+#### 2.2 使用方法
 1. **克隆项目**：
    ```bash
    git clone <this repo>
@@ -76,11 +76,11 @@ supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项
    ```
    - 等待容器拉取并初始化，首次启动可能需要几分钟。
 
-4. **访问平台**：
+### 3. 访问平台
    - 在浏览器中访问 `http://<YOUR-DOMAIN>:<YOUR-PORT>`（根据 `.env` 文件中的 `ENTRANCE_DOMAIN` 和 `ENTRANCE_PORT` 设置）。
 
-5. **许可证**：
-   - 本项目基于 Apache2.0 许可证发布，详情请参见 LICENSE 文件。
+## 许可证
+   - 本项目基于 Apache 2.0 许可证发布，详情请参见 LICENSE 文件。
 
-6. **联系我们**：
+## 联系我们
    - 如果你有任何问题，请提交 issue 或发送邮件与我们联系。
