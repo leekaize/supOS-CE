@@ -34,7 +34,7 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
   - Docker Buildx: v0.19.2
   - Docker Compose: v2.31.0
   - containerd: 1.7.24
-  - 
+    
 #### 1.2 Usage
 1. **Clone the project using Git Bash**:
    ```bash
