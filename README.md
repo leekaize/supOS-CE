@@ -5,7 +5,7 @@
 ---
 
 ## Introduction
-supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **mcpclient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
+supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **McpClient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
 
 ## Platform Architecture
 
