@@ -25,7 +25,7 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
 
 ## Installation
 
-### 1. Linux
+### 1.Linux
 
 #### 1.1 Operating Environment
 - **Operating System**: Currently tested on Ubuntu Server 24.04 with Docker. We welcome feedback on other OS distributions.
@@ -35,7 +35,7 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
   - Docker Compose: v2.31.0
   - containerd: 1.7.24
   - 
-#### Usage
+#### 1.2 Usage
 1. **Clone the project using Git Bash**:
    ```bash
    git clone <this repo>
@@ -54,13 +54,13 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
      
    If you don’t have Docker installed yet, our scripts can help set it up for Ubuntu Server 24.04. For other operating systems, please refer to the official Docker documentation.
 
-### 1.2 Windows
+### 2.Windows
 
-#### Operating Environment
+#### 2.1 Operating Environment
 - Install the latest version of **Docker Desktop** and **Git** on Windows 10 or Windows 11.
 - It is recommended to perform all operations in **Git Bash**.
 
-### 2. Usage
+#### 2.2 Usage
 1. **Clone the project**:
    ```bash
    git clone <this repo>
@@ -76,11 +76,11 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
    ```
    - Wait for containers to pull and initialize. This may take a few minutes on first run.
 
-4. **Access the Platform**:
+### 3.Access the Platform
    - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
 
-5. **License**:
+## License
    - This project is distributed under Apache 2.0. See LICENSE for details.
 
-6. **Contact**:
+## Contact
    - If you have questions, open an issue or email us.
