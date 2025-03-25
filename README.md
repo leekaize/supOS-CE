@@ -34,15 +34,7 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
   - Docker Buildx: v0.19.2
   - Docker Compose: v2.31.0
   - containerd: 1.7.24
-
-If you don’t have Docker installed yet, our scripts can help set it up for Ubuntu Server 24.04. For other operating systems, please refer to the official Docker documentation.
-
-### 1.2 Windows
-
-#### Operating Environment
-- Install the latest version of **Docker Desktop** and **Git** on Windows 10 or Windows 11.
-- It is recommended to perform all operations in **Git Bash**.
-
+  - 
 #### Usage
 1. **Clone the project using Git Bash**:
    ```bash
@@ -59,6 +51,14 @@ If you don’t have Docker installed yet, our scripts can help set it up for Ubu
    bash bin/startup.sh
    ```
    - Wait for containers to pull and initialize. The first run may take a few minutes.
+     
+   If you don’t have Docker installed yet, our scripts can help set it up for Ubuntu Server 24.04. For other operating systems, please refer to the official Docker documentation.
+
+### 1.2 Windows
+
+#### Operating Environment
+- Install the latest version of **Docker Desktop** and **Git** on Windows 10 or Windows 11.
+- It is recommended to perform all operations in **Git Bash**.
 
 ### 2. Usage
 1. **Clone the project**:
