@@ -11,15 +11,15 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
 
 ### Core Components
 
-- **Microservices Architecture**: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
-- **API Gateway & Management**: Uses **Kong** for API management and **Konga** for UI-based control.
-- **Edge & IoT Data Handling**: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
-- **Database & Time-Series Storage**: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
-- **Observability & Logging**: **Elasticsearch, Filebeat, and Kibana** for centralized logging and visualization.
-- **SCADA & Dashboards**: **FUXA** for SCADA-like monitoring, **Grafana** for customizable analytics.
-- **Security & Authentication**: **Keycloak** for centralized SSO and identity management.
-- **Object Storage**: **MinIO** as a high-performance, S3-compatible storage solution.
-- **GraphQL Integration**: **Hasura** for real-time GraphQL APIs on PostgreSQL/TimescaleDB.
+- Microservices Architecture: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
+- API Gateway & Management: Uses **Kong** for API management and **Konga** for UI-based control.
+- Edge & IoT Data Handling: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
+- Database & Time-Series Storage: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
+- Observability & Logging: **Elasticsearch, Filebeat, and Kibana** for centralized logging and visualization.
+- SCADA & Dashboards: **FUXA** for SCADA-like monitoring, **Grafana** for customizable analytics.
+- Security & Authentication: **Keycloak** for centralized SSO and identity management.
+- Object Storage: **MinIO** as a high-performance, S3-compatible storage solution.
+- GraphQL Integration: **Hasura** for real-time GraphQL APIs on PostgreSQL/TimescaleDB.
 
 ---
 
