@@ -80,7 +80,7 @@ supOS 是一个开源的工业物联网 (IIoT) 平台，集成了多个开源项
    - 在浏览器中访问 `http://<YOUR-DOMAIN>:<YOUR-PORT>`（根据 `.env` 文件中的 `ENTRANCE_DOMAIN` 和 `ENTRANCE_PORT` 设置）。
 
 5. **许可证**：
-   - 本项目基于 [LICENSE_NAME] 许可证发布，详情请参见 LICENSE 文件。
+   - 本项目基于 Apache2.0 许可证发布，详情请参见 LICENSE 文件。
 
 6. **联系我们**：
    - 如果你有任何问题，请提交 issue 或发送邮件与我们联系。
