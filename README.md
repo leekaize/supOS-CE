@@ -7,7 +7,6 @@
 ## Introduction
 supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **mcpclient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
 
-
 ## Platform Architecture
 
 ### Core Components
@@ -38,35 +37,50 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
 
 If you don’t have Docker installed yet, our scripts can help set it up for Ubuntu Server 24.04. For other operating systems, please refer to the official Docker documentation.
 
+### 1.2 Windows
+
+#### Operating Environment
+- Install the latest version of **Docker Desktop** and **Git** on Windows 10 or Windows 11.
+- It is recommended to perform all operations in **Git Bash**.
+
+#### Usage
+1. **Clone the project using Git Bash**:
+   ```bash
+   git clone <this repo>
+   ```
+2. **Modify the environment variables in the `.env` file**:
+   - Navigate to the `supos-ce-deploy` directory and edit the `.env` file.
+   - Update `VOLUMES_PATH` (directory for storing project data).
+   - Update `ENTRANCE_DOMAIN` (frontend entry domain/IP address).
+   - Modify other variables as needed.
+
+3. **Start the project**:
+   ```bash
+   bash bin/startup.sh
+   ```
+   - Wait for containers to pull and initialize. The first run may take a few minutes.
+
 ### 2. Usage
 1. **Clone the project**:
    ```bash
    git clone <this repo>
-   
+   ```
 2. **Edit environment variables in the .env file**:
-- VOLUMES_PATH (directory for storing project data)
-  
-- ENTRANCE_DOMAIN( Do not use 127.0.0.1)
-  
-- Any other required variables per your environment
+   - VOLUMES_PATH (directory for storing project data)
+   - ENTRANCE_DOMAIN (Do not use 127.0.0.1)
+   - Any other required variables per your environment
 
 3. **Start the project**:
- ```bash
-bash bin/startup.sh
-```
-- Wait for containers to pull and initialize. This may take a few minutes on first run.
+   ```bash
+   bash bin/startup.sh
+   ```
+   - Wait for containers to pull and initialize. This may take a few minutes on first run.
 
-4. **Access to the Platform**:
+4. **Access the Platform**:
+   - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
 
-Visit http://<YOUR-DOMAIN>:<YOUR-PORT> in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in .env).
+5. **License**:
+   - This project is distributed under [LICENSE_NAME]. See LICENSE for details.
 
-5.**License**: 
-
-This project is distributed under [LICENSE_NAME]. See LICENSE for details.
-
-
-6. **Contact**: 
-
-If you have questions, open an issue or email us.
-
-
+6. **Contact**:
+   - If you have questions, open an issue or email us.
