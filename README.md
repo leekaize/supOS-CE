@@ -48,7 +48,7 @@ If you don’t have Docker installed yet, our scripts can help set it up for Ubu
 3. **Start the project**:
  ```bash
 bash bin/startup.sh
-
+```
 - Wait for containers to pull and initialize. This may take a few minutes on first run.
 
 4. **Access to the Platform**:
