@@ -39,11 +39,18 @@ If you don’t have Docker installed yet, our scripts can help set it up for Ubu
    
 2. **Edit environment variables in the .env file**:
 - VOLUMES_PATH (directory for storing project data)
-
-- ENTRANCE_DOMAIN (domain or IP address for frontend)
-
+  
+- ENTRANCE_DOMAIN( Do not use 127.0.0.1)
+  
 - Any other required variables per your environment
+  
 
 3. **Start the project**:
  ```bash
 bash bin/startup.sh
+
+- Wait for containers to pull and initialize. This may take a few minutes on first run.
+
+4. **Access to the Platform**:
+
+Visit http://<YOUR-DOMAIN>:<YOUR-PORT> in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in .env).
