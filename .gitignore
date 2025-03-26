@@ -10,11 +10,12 @@ build/
 *.iml
 *.iws
 .git/
-
+.gitattributes
 # OS specific files
 .DS_Store
 Thumbs.db
-
+README.md
+README_zh.md
 # Temporary files
 *.tmp
 *.temp
