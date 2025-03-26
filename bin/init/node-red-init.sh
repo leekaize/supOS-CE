@@ -51,6 +51,7 @@ docker exec $2 npm install $3 --offline --prefix /data /data/offline_modules/nod
 || error "node-red install model-converter failed!"
 
 # overide js file
-docker exec $2 sh -c "cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/"
-
+if [[ "$2" == "nodered" ]]; then
+    docker exec $2 sh -c 'cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/' >/dev/null
+fi
 docker restart $2 >/dev/null

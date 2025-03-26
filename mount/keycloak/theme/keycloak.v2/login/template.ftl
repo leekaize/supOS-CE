@@ -11,7 +11,7 @@
         </span>
       </div>
       <div class="${properties.kcInputGroupItemClass}">
-        <button id="reset-login" class="${properties.kcFormPasswordVisibilityButtonClass} kc-login-tooltip" type="button" 
+        <button id="reset-login" class="${properties.kcFormPasswordVisibilityButtonClass} kc-login-tooltip" type="button"
               aria-label="${msg('restartLoginTooltip')}" onclick="location.href='${url.loginRestartFlowUrl}'">
             <i class="fa-sync-alt fas" aria-hidden="true"></i>
             <span class="kc-tooltip-text">${msg("restartLoginTooltip")}</span>
@@ -35,7 +35,7 @@
         </#list>
     </#if>
     <title>${msg("loginTitle",(realm.displayName!''))}</title>
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="/files/system/resource/supos/logo-ico.svg" id="dynamic-favicon"/>
     <#if properties.stylesCommon?has_content>
         <#list properties.stylesCommon?split(' ') as style>
             <link href="${url.resourcesCommonPath}/${style}" rel="stylesheet" />
@@ -65,9 +65,8 @@
     </#if>
     <script type="module" src="${url.resourcesPath}/js/passwordVisibility.js"></script>
     <script type="module">
-        import { checkCookiesAndSetTimer } from "${url.resourcesPath}/js/authChecker.js";
-
-        checkCookiesAndSetTimer(
+        import { startSessionPolling } from "${url.resourcesPath}/js/authChecker.js";
+        startSessionPolling(
             "${url.ssoLoginInOtherTabsUrl?no_esc}"
         );
 
@@ -84,17 +83,34 @@
           if (isEnabled) {
             classList.add(DARK_MODE_CLASS);
             if(logoDom&&loginArrowDom){
-              logoDom.style.backgroundImage='url(${url.resourcesPath}/img/supos-logo-dark.svg)'
-              loginArrowDom.style.backgroundImage='url(${url.resourcesPath}/img/login-arrow-dark.svg)'
+              logoDom.src="/files/system/resource/supos/logo-dark.png";
+              logoDom.onerror="this.onerror=null; this.src='${url.resourcesPath}/img/supos-logo-dark.svg';";
+              loginArrowDom.style.backgroundImage='url(${url.resourcesPath}/img/login-arrow-dark.svg)';
             }
           } else {
             classList.remove(DARK_MODE_CLASS);
             if(logoDom&&loginArrowDom){
-              logoDom.style.backgroundImage='url(${url.resourcesPath}/img/supos-logo.svg)'
-              loginArrowDom.style.backgroundImage='url(${url.resourcesPath}/img/login-arrow.svg)'
+              logoDom.src="/files/system/resource/supos/logo-light.png";
+              logoDom.onerror=function() {
+                this.onerror = null;
+                this.src = '${url.resourcesPath}/img/supos-logo.svg';
+              };
+              loginArrowDom.style.backgroundImage='url(${url.resourcesPath}/img/login-arrow.svg)';
             }
           }
         }
+    </script>
+    <script>
+      const favicon = document.getElementById('dynamic-favicon');
+
+      // 检测 SVG 是否加载失败
+      const img = new Image();
+      img.src = favicon.href;
+
+      img.onerror = function() {
+        // 替换为备用图标
+        favicon.href = '/log.svg';
+      };
     </script>
 </head>
 
@@ -112,7 +128,7 @@
       <div class="pf-v5-c-login-l-t-right"></div>
     </div>
     <div class="pf-v5-c-login-l-bottom">
-      <div class="supos-logo"></div>
+      <img class="supos-logo" src="/minio/inter/supos/logo-light.png"></img>
       <div>${msg("customIndustrialOperatingSystem")}</div>
     </div>
   </div>

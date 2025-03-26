@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: eco-registry.supos.com/sup9bnlh/supos-frontend-platform:1.0.5-T4
+    image: eco-registry.supos.com/sup9bnlh/supos-frontend-platform:1.0.5-T6
     container_name: frontend
     ports:
       - "3010:3000"
@@ -19,7 +19,7 @@ services:
     networks:
       - default_network
   backend:
-    image:  eco-registry.supos.com/sup9bnlh/backend:1.0.5-T4
+    image:  eco-registry.supos.com/sup9bnlh/backend:1.0.5-T6
     container_name: backend
     environment:
       - MEM_OPTS=-Xms512m -Xmx1536m
@@ -28,7 +28,7 @@ services:
       - ENV_DB_PORT=5432
       - NODE_RED_HOST=nodered
       - NODE_RED_PORT=1880
-      - MULTIPLE_TOPIC=${MULTIPLE_TOPIC}
+      - SYS_OS_MULTIPLE_TOPIC=${MULTIPLE_TOPIC}
       - SYS_OS_VERSION=${OS_VERSION}
       - SYS_OS_LANG=${LANGUAGE}
       - SYS_OS_AUTH_ENABLE=${OS_AUTH_ENABLE}
@@ -119,6 +119,39 @@ services:
     depends_on:
       - emqx
     restart: always
+    networks:
+      - default_network
+  eventflow:
+    image: nodered/node-red:4.0.8-22
+    container_name: eventflow
+    user: root
+    ports:
+      - "1889:1889"  # Node-RED web UI端口
+    environment:
+      - service_logo=nodered-original.svg
+      - service_description=aboutus.nodeRedDescription
+      - FLOWS=/data/flows.json
+      - TZ=UTC
+      - OS_LANG=${LANGUAGE}
+      - NODE_OPTIONS=--openssl-legacy-provider
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMES_PATH}/eventflow:/data  # 使用当前目录的 data 目录
+    restart: always
+    networks:
+      - default_network
+  mcpclient:
+    container_name: mcpclient
+    image: wenhao96/supos-mcpclient:latest
+    ports:
+      - "32893:3000"
+      - "32894:8123"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - AGENT_DEPLOYMENT_URL=${AGENT_DEPLOYMENT_URL}
+      - SUPOS_API_KEY=${SUPOS_API_KEY}
+      - SUPOS_API_URL=${SUPOS_API_URL}
     networks:
       - default_network
   grafana:
@@ -358,7 +391,7 @@ services:
       - default_network
   fuxa:
     container_name: fuxa
-    image: eco-registry.supos.com/sup9bnlh/fuxa:1.0.5-T7
+    image: eco-registry.supos.com/sup9bnlh/fuxa:1.0.5-T10
     profiles:
       - fuxa
     environment:

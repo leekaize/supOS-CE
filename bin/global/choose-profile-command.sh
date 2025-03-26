@@ -1,13 +1,18 @@
 #!/bin/bash
 
-activeServices="emqx,nodered,hasura,keycloak,kong"
+activeServices="emqx,nodered,hasura,keycloak,kong,postgres"
 profileCommand=""
 OUTPUT_FILE=$SCRIPT_DIR/global/active-services.txt
 # ENV_TMP=$SCRIPT_DIR/../.env.tmp
 
 chooseProfile() {
 
-    read -p "\nDo you need to select which services to install? [1] No, use defaults [2] Yes (default No)" askyou
+    echo -e "\n"
+    if [[ "$LANGUAGE" == "zh-CN" ]]; then
+        read -p "您是否需要自定义安装哪些服务? [1] 不，使用默认配置即可 [2] 是的，我要选择 (默认 1)" askyou
+    else 
+        read -p "Do you need to customize which services to install? [1] No, use defaults [2] Yes (default 1)" askyou
+    fi
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
         profileCommand="--profile fuxa --profile grafana --profile minio --profile tdengine "
@@ -33,8 +38,11 @@ chooseProfile() {
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
-
-        read -p "Step 4: Please select a time-series database: [1] TDEngine  [2] TimescaleDB (default TDEngine)" choicedb
+        if [[ "$LANGUAGE" == "zh-CN" ]]; then
+            read -p "Step 4: 请选择一种时序数据库: [1] TDEngine  [2] TimescaleDB (默认 1)" choicedb
+        else 
+            read -p "Step 4: Please select a time-series database: [1] TDEngine  [2] TimescaleDB (default 1)" choicedb
+        fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
             profileCommand+="--profile tdengine "

@@ -9,7 +9,10 @@ source $SCRIPT_DIR/../global/log.sh
 
 # load npm cache
 rm -rf $SCRIPT_DIR/../../mount/node-red/.npm/
+rm -rf $SCRIPT_DIR/../../mount/eventflow/.npm/
 tar -zxvf $SCRIPT_DIR/../../mount/node-red/npmCache.tar.gz -C $SCRIPT_DIR/../../mount/node-red/ > /dev/null 2>&1
+tar -zxvf $SCRIPT_DIR/../../mount/eventflow/npmCache.tar.gz -C $SCRIPT_DIR/../../mount/eventflow/ > /dev/null 2>&1
+
 echo "Info: loading npm cache complete."
 find $SCRIPT_DIR/../../mount/grafana/data/plugins/ -type f -name "*.tar" -exec tar -xvf {} -C $SCRIPT_DIR/../../mount/grafana/data/plugins/ \;
 
@@ -20,6 +23,8 @@ cp -r $SCRIPT_DIR/../../mount/kong/* $VOLUMES_PATH/kong/
 cp $SCRIPT_DIR/../../mount/emqx/config/* $VOLUMES_PATH/emqx/config/
 rm -rf $VOLUMES_PATH/node-red/.npm && cp -r $SCRIPT_DIR/../../mount/node-red/.npm  $VOLUMES_PATH/node-red/
 cp -r $SCRIPT_DIR/../../mount/node-red/* $VOLUMES_PATH/node-red/
+mkdir -p $VOLUMES_PATH/eventflow/ && cp -r $SCRIPT_DIR/../../mount/eventflow/* $VOLUMES_PATH/eventflow/
+rm -rf $VOLUMES_PATH/eventflow/.npm && cp -r $SCRIPT_DIR/../../mount/eventflow/.npm  $VOLUMES_PATH/eventflow/
 cp -r $SCRIPT_DIR/../../mount/filebeat/*.yml $VOLUMES_PATH/filebeat/
 cp -r $SCRIPT_DIR/../../mount/postgresql/* $VOLUMES_PATH/postgresql/
 cp -r $SCRIPT_DIR/../../mount/backend/log/topology.log $VOLUMES_PATH/backend/log/topology.log
