@@ -84,3 +84,17 @@ supOS is an open-source Industrial Internet of Things (IIoT) platform that integ
 
 ## Contact
    - If you have questions, open an issue or email us.
+     
+# Contributors
+
+We gratefully acknowledge the following individuals for their contributions to this project:
+
+- **Wenhao Yu** – Architecture  
+- **Liebo** – UNS  
+- **Weipeng Dong** – FUXA  
+- **Kangxi & Lifang Sun** – Backend  
+- **Minghe Zhuang** – Node-RED  
+- **Wangji Xin** – Grafana  
+- **Fayue Zheng & Yue Yang** – Frontend, Generative UI  
+- **Yanqiu Liu** – McpClient  
+
