@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: eco-registry.supos.com/sup9bnlh/supos-frontend-platform:1.0.5-T6
+    image: suposce/supos-ce-platform:latest
     container_name: frontend
     ports:
       - "3010:3000"
@@ -19,7 +19,7 @@ services:
     networks:
       - default_network
   backend:
-    image:  eco-registry.supos.com/sup9bnlh/backend:1.0.5-T6
+    image:  suposce/supos-ce-backend:latest
     container_name: backend
     environment:
       - MEM_OPTS=-Xms512m -Xmx3g
@@ -142,7 +142,7 @@ services:
       - default_network
   mcpclient:
     container_name: mcpclient
-    image: wenhao96/supos-mcpclient:latest
+    image: suposce/supos-ce-mcpclient:latest
     ports:
       - "32893:3000"
       - "32894:8123"
@@ -472,7 +472,7 @@ services:
     container_name: fuxa
     profiles:
       - fuxa
-    image: eco-registry.supos.com/sup9bnlh/fuxa:1.0.5-T10
+    image: suposce/supos-ce-fuxa:latest
     environment:
       - LANG=${FUXA_LANG:-en}
       - service_logo=fuxa.svg
