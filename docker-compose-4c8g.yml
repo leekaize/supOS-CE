@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: eco-registry.supos.com/sup9bnlh/supos-frontend-platform:1.0.5-T6
+    image: suposce/supos-ce-platform:latest
     container_name: frontend
     ports:
       - "3010:3000"
@@ -19,7 +19,7 @@ services:
     networks:
       - default_network
   backend:
-    image:  eco-registry.supos.com/sup9bnlh/backend:1.0.5-T6
+    image:  suposce/supos-ce-backend:latest
     container_name: backend
     environment:
       - MEM_OPTS=-Xms512m -Xmx1536m
