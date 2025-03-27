@@ -419,6 +419,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${VOLUMES_PATH}/portainer:/data
+    networks:
+      - default_network
   konga:
     image: pantsel/konga:0.14.9
     container_name: konga
@@ -516,6 +518,7 @@ services:
       - GITEA__service__ALLOW_ONLY_EXTERNAL_REGISTRATION=true
       - GITEA__server__SSH_DOMAIN=${ENTRANCE_PROTOCOL}
       - GITEA__server__SSH_PORT=2222
+      - GITEA__security__INSTALL_LOCK=true
     volumes:
       - ${VOLUMES_PATH}/gitea:/data
     networks:
