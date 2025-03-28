@@ -27,7 +27,7 @@ else
   docker compose --env-file $SCRIPT_DIR/../.env --project-name supos $command -f $DOCKER_COMPOSE_FILE down && rm -f $VOLUMES_PATH/backend/system/active-services.txt
 fi
 
-rm -f $SCRIPT_DIR/../.env.tmp /dev/null 2>&1
+rm -f $SCRIPT_DIR/../.env.tmp > /dev/null 2>&1
 #docker volume ls -q --filter "name=supos" | xargs docker volume rm
 # 删除所有容器和镜像
 #docker rmi $(docker images -q)
