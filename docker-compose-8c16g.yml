@@ -152,6 +152,7 @@ services:
       - AGENT_DEPLOYMENT_URL=${AGENT_DEPLOYMENT_URL}
       - SUPOS_API_KEY=${SUPOS_API_KEY}
       - SUPOS_API_URL=${SUPOS_API_URL}
+      - SUPOS_MQTT_URL=${SUPOS_MQTT_URL}
     networks:
       - default_network
   grafana:
