@@ -411,6 +411,8 @@ services:
   portainer:
     image: portainer/portainer-ce:2.23.0
     container_name: portainer
+    environment:
+      service_logo: portainer.svg
     command: --admin-password="$$2y$$05$$ZTAqF7Tn.hil8X.ifVmQTuKiJQoZDiKDW3t1lRR2/VPR06QoHv4AC"
     ports:
       - "8000:8000"
@@ -497,6 +499,7 @@ services:
       - '10824:10824'
     command: java -Dloader.path=lib -Dspring.profiles.active=release -Dchatgpt.apiKey=${OPENAI_API_KEY} -jar chat2db-server-web-start.jar
     environment:
+      - service_logo=chat2db.svg
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - default_network
@@ -507,6 +510,7 @@ services:
       - "3030:3000"
       - "2222:22"
     environment:
+      - service_logo=gitea.svg
       - GITEA__server__ROOT_URL=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/gitea/home/
       - GITEA__oauth2__ENABLED=true
       - GITEA__oauth2__ENABLE_OAUTH2_REGISTER=true

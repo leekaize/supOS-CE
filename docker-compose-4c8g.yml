@@ -391,7 +391,7 @@ services:
       - default_network
   fuxa:
     container_name: fuxa
-    image: eco-registry.supos.com/sup9bnlh/fuxa:1.0.5-T10
+    image: suposce/supos-ce-fuxa:latest
     profiles:
       - fuxa
     environment:
@@ -416,6 +416,7 @@ services:
       - '10824:10824'
     command: java -Dloader.path=lib -Dspring.profiles.active=release -Dchatgpt.apiKey=${OPENAI_API_KEY} -jar chat2db-server-web-start.jar
     environment:
+      - service_logo=chat2db.svg
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - default_network
