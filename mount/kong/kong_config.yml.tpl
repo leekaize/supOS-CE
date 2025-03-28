@@ -1421,8 +1421,7 @@ routes:
   snis: ~
   path_handling: v1
   regex_priority: 0
-  tags:
-  - menu
+  tags: []
   protocols:
   - http
   - https
