@@ -139,6 +139,24 @@ services:
   retries: 5
   protocol: http
 - enabled: true
+  created_at: 1742976133
+  updated_at: 1742976133
+  id: 42684a67-ac8f-48d6-ae2b-62e1cd26f9d8
+  tls_verify: ~
+  connect_timeout: 60000
+  tls_verify_depth: ~
+  path: /service-api/supos/proxy/event/flows
+  client_certificate: ~
+  tags: []
+  ca_certificates: ~
+  host: backend
+  port: 8080
+  read_timeout: 60000
+  write_timeout: 60000
+  name: event-flow-proxy
+  retries: 5
+  protocol: http
+- enabled: true
   created_at: 1729740779
   updated_at: 1742432166
   id: 43a4afb4-cabf-4fd8-a3f4-d8b31408e6dc
@@ -545,6 +563,30 @@ services:
   protocol: http
 routes:
 - sources: ~
+  created_at: 1742976255
+  updated_at: 1742976255
+  service: 42684a67-ac8f-48d6-ae2b-62e1cd26f9d8
+  destinations: ~
+  id: e8e7fe7d-16ba-415a-8d19-e2c41b76b365
+  methods: ~
+  headers: ~
+  snis: ~
+  path_handling: v1
+  regex_priority: 0
+  tags: []
+  protocols:
+    - http
+    - https
+  paths:
+    - /eventflow/home/flows
+  https_redirect_status_code: 426
+  hosts: ~
+  strip_path: true
+  name: event-node-flows
+  request_buffering: true
+  preserve_host: false
+  response_buffering: true
+- sources: ~
   created_at: 1730253324
   updated_at: 1742539723
   service: 43a4afb4-cabf-4fd8-a3f4-d8b31408e6dc
@@ -864,6 +906,30 @@ routes:
   snis: ~
   path_handling: v1
   regex_priority: 0
+  tags: []
+  protocols:
+  - http
+  - https
+  paths:
+  - /eventflow/home/
+  https_redirect_status_code: 426
+  hosts: ~
+  strip_path: true
+  name: EventFlowBackend
+  request_buffering: true
+  preserve_host: false
+  response_buffering: true
+- sources: ~
+  created_at: 1742968905
+  updated_at: 1742968905
+  service: 8e081976-8223-4494-9b4c-0aa5a441bdd5
+  destinations: ~
+  id: b8262364-32bf-4422-9d6c-04b97bc8c3a7
+  methods: ~
+  headers: ~
+  snis: ~
+  path_handling: v1
+  regex_priority: 0
   tags:
   - menu
   - homeParentName:menu.tag.uns
@@ -874,7 +940,7 @@ routes:
   - http
   - https
   paths:
-  - /eventflow/home/
+  - /EventFlow
   https_redirect_status_code: 426
   hosts: ~
   strip_path: true
@@ -1361,7 +1427,7 @@ routes:
   - http
   - https
   paths:
-  - /swagger-ui/
+  - /swagger-ui
   https_redirect_status_code: 426
   hosts: ~
   strip_path: true
@@ -1913,6 +1979,7 @@ plugins:
     - ^/403$
     - ^/open-api/.*$
     - ^/keycloak.*$
+    - ^/files.*$
     - ^/test/.*$
     enable_resource_check: true
     enable_deny_check: true

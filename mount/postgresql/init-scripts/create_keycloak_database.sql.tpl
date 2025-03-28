@@ -3031,6 +3031,7 @@ INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/menu.account');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/AboutUs');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/ElasticSearch');
+INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/elastic');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/CopilotKit');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/flow-editor');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/ObjectStorageServer');
@@ -3064,6 +3065,7 @@ INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/Gitea');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/ContainerManagement');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/McpClient');
+INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/nodered');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/GenerativeUI');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/AboutUs');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/GenApps');
@@ -3088,10 +3090,14 @@ INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956d
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/todo');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/Namespace');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/EventFlow');
+INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/flow-editor');
+INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/EvenFlowEditor');
+INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/chat2db');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/Apm');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/todo');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/Konga');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/Namespace');
+INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/EvenFlowEditor');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/GraphQL');
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/EventFlow');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/AdvancedUse');
@@ -3100,6 +3106,7 @@ INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/UserManagement');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/GenerativeUI');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/Logs');
+INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/elastic');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/AboutUs');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/ObjectStorageServer');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/GenApps');
@@ -3122,6 +3129,8 @@ INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/todo');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/Namespace');
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/EventFlow');
+INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/EvenFlowEditor');
+INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/flow-editor');
 
 -- ----------------------------
 -- Table structure for revoked_token

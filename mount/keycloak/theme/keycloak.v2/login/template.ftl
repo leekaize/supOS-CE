@@ -84,7 +84,10 @@
             classList.add(DARK_MODE_CLASS);
             if(logoDom&&loginArrowDom){
               logoDom.src="/files/system/resource/supos/logo-dark.png";
-              logoDom.onerror="this.onerror=null; this.src='${url.resourcesPath}/img/supos-logo-dark.svg';";
+              logoDom.onerror=function() {
+                this.onerror = null;
+                this.src='${url.resourcesPath}/img/supos-logo-dark.svg';
+              };
               loginArrowDom.style.backgroundImage='url(${url.resourcesPath}/img/login-arrow-dark.svg)';
             }
           } else {
@@ -128,7 +131,7 @@
       <div class="pf-v5-c-login-l-t-right"></div>
     </div>
     <div class="pf-v5-c-login-l-bottom">
-      <img class="supos-logo" src="/minio/inter/supos/logo-light.png"></img>
+      <img class="supos-logo" src="/files/system/resource/supos/logo-light.png"></img>
       <div>${msg("customIndustrialOperatingSystem")}</div>
     </div>
   </div>

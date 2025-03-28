@@ -6,7 +6,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 source $SCRIPT_DIR/../global/log.sh
 
-echo ">> start to init node-red modules ..."
+echo ">> start to init $2 modules ..."
 while true; do
     # 检查端口是否开启
     if lsof -i :$1 > /dev/null 2>&1; then
@@ -51,7 +51,5 @@ docker exec $2 npm install $3 --offline --prefix /data /data/offline_modules/nod
 || error "node-red install model-converter failed!"
 
 # overide js file
-if [[ "$2" == "nodered" ]]; then
-    docker exec $2 sh -c 'cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/' >/dev/null
-fi
+docker exec $2 sh -c 'cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/' >/dev/null
 docker restart $2 >/dev/null

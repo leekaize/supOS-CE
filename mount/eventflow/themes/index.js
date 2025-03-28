@@ -25,18 +25,18 @@
   // 处理接收到的消息
   function messageHandler(event) {
     // 当监听到请求数据
-    if (event.data.type === 'requestFlows') {
+    if (event.data.type === 'requestEventFlows') {
       // 获取当前编辑器中的完整节点集合
       const completeNodeSet = RED.nodes.createCompleteNodeSet();
       // 将节点集合通过 postMessage 发送给父窗口
-      window.parent.postMessage({ type: 'currentFlows', data: { flows: completeNodeSet, type: event.data.data } }, '*');
-    } else if (event.data.type === 'openMenu') {
+      window.parent.postMessage({ type: 'currentEventFlows', data: { flows: completeNodeSet, type: event.data.data } }, '*');
+    } else if (event.data.type === 'openEventMenu') {
       event.data.data.id && document.querySelector(`#${event.data.data.id}`).click()
     }
   };
   // 通知父节点是否变化
   function flowsChange(params) {
-    window.parent.postMessage({ type: 'flowsChange', data: params }, '*');
+    window.parent.postMessage({ type: 'eventFlowsChange', data: params }, '*');
   }
   // RED内置事件监听
   RED.events.on('flows:change', flowsChange)
