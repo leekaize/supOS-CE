@@ -174,7 +174,7 @@ services:
       # 开启 Grafana 的 Explore 功能
       GF_EXPLORE_ENABLED: "true"
       # 安装 Grafana 插件
-      # GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-mqtt-datasource,tdengine-datasource,yesoreyeram-infinity-datasource"
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-mqtt-datasource,tdengine-datasource,yesoreyeram-infinity-datasource"
       # 注释掉的设置，用于改变 Grafana 用户界面的语言
       GF_VIEWER_LANGUAGE: "${GRAFANA_LANG:-en-US}"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
