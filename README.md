@@ -59,7 +59,7 @@ In the **Namespace** section:
   Quality/orderQualitylog
   Quality/qualityAnalysis
   ```
-![Namespace](./images/namespace.png)
+![Namespace](./image/namespace.png)
 - For folders: only name is required.
 - For namespaces（file icon）:
   - Choose data type: time-series or relational.
@@ -80,14 +80,14 @@ Update each flow to parse real data using Node-RED nodes:
 - **Modbus PLC** → Read status → Format JSON → Send to `Equipment/CNC1`
 - **Excel File** → Extract key rows → Format JSON → Send to `Quality/orderQualitylog`
 
-![nodered](./images/nodered.png)
+![nodered](./image/nodered.png)
 
 ---
 
 ### Step 3: Create Event Flow
 
 Using **Event Flow**, connect real-time order and quality data to the LLM and write results back to `Quality/qualityAnalysis`.
-![nodered](./images/event.png)
+![nodered](./image/event.png)
 
 At this point, you have completed a integration usecase using supOS.
 
