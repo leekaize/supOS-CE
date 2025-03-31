@@ -14,7 +14,6 @@ This approach allows users to securely collect, analyze, and share data across m
 
 ### Core Components
 
-- UNS: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
 - API Gateway & Management: Uses **Kong** for API management and **Konga** for UI-based control.
 - Edge & IoT Data Handling: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
 - Database & Time-Series Storage: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
