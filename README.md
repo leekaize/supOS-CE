@@ -180,6 +180,7 @@ After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to gener
 
 ### 3.Access the Platform
    - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
+   - Default superadmin and password : supos/Supos@1304
 
 ## License
    - This project is distributed under Apache 2.0. See LICENSE for details.
