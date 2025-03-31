@@ -2,29 +2,131 @@
 
 [English](README.md) | [中文](README_zh.md)
 
----
+**supOS** is an open-source industrial data integration platform built on the **Unified Namespace (UNS)** methodology and powered by production-grade open-source technologies.
 
-# Introduction
-
-**supOS** is an open-source Industrial Internet of Things (IIoT) platform built around the **Unified Namespace (UNS)** concept, ensuring flexible, free distribution of industrial data via MQTT. By integrating a diverse set of open-source services—such as Kong, EMQX, Node-RED, Keycloak, and TimescaleDB—supOS creates a modular foundation for real-time data handling, identity management, and event processing.
-
-This approach allows users to securely collect, analyze, and share data across machines, applications, and edge devices. Through **MQTT-based UNS**, any data point—from sensors on a factory floor to cloud-hosted analytics—becomes universally accessible. This architecture removes the need for tightly coupled, proprietary systems, thereby streamlining data flow and empowering rapid, scalable IIoT development.
-
-## Platform Architecture
-
-### Core Components
-
-- API Gateway & Management: Uses **Kong** for API management and **Konga** for UI-based control.
-- Edge & IoT Data Handling: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
-- Database & Time-Series Storage: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
-- Observability & Logging: **Elasticsearch, Filebeat, and Kibana** for centralized logging and visualization.
-- SCADA & Dashboards: **FUXA** for SCADA-like monitoring, **Grafana** for customizable analytics.
-- Security & Authentication: **Keycloak** for centralized SSO and identity management.
-- Object Storage: **MinIO** as a high-performance, S3-compatible storage solution.
-- GraphQL Integration: **Hasura** for real-time GraphQL APIs on PostgreSQL/TimescaleDB.
+![arc](./image/arc.png)
 
 ---
 
+## Architecture Overview
+![func](./image/func.png)
+
+- **Source Flow**  
+  Serves as the connection pipeline to devices and systems. It handles real-time protocol translation into JSON payloads. Built entirely on Node-RED.
+
+- **Namespace**  
+  The core of supOS. A semantic MQTT broker and parser that models data using topic hierarchies and structured JSON payloads.
+
+- **Sink**  
+  The storage layer of supOS.  
+  - Time-series Namespace values are stored in **TimescaleDB**, **TDengine**, etc.  
+  - Relational Namespace values (e.g., CRM data) are stored in **PostgreSQL**.  
+  This enables efficient querying and compression.
+
+- **Event Flow**  
+  Orchestrates Namespaces into higher-level event/information flows. Supports merging JSON payloads and appending system-generated prompts for LLM-powered optimization.
+
+---
+
+## Quick Start
+
+### Deployment
+
+> **Note**: supOS is theoretically compatible with any OS running Docker. Currently, it has only been tested on **Ubuntu Server 24.04**. Feedback on other environments is highly appreciated.
+
+1. **Download the image**  
+   Clone the repository via Git or download the release zip package. Run the installation script:
+   ```bash
+   ./startup.sh
+   ```
+
+2. **Configure environment variables**  
+   Modify the `.env` file based on your deployment needs.
+
+---
+
+## Example Integration Usecase
+
+**Objective**: Integrate work order data (ERP), equipment status (PLC), and quality metrics (Excel) to track execution and send the data to an LLM for root cause analysis.
+
+### Step 1: Create Namespaces
+
+In the **Namespace** section:
+- Create folders and files to define a simple structure:
+  ```
+  Equipment/CNC1
+  Order/orderInfo
+  Quality/orderQualitylog
+  Quality/qualityAnalysis
+  ```
+![Namespace](./images/namespace.png)
+- For folders: only name is required.
+- For namespaces（file icon）:
+  - Choose data type: time-series or relational.
+  - Enable **Persistence** if needed.
+  - Leave other settings as default.
+
+These actions will generate MQTT topics in supOS’s internal broker.
+
+---
+
+### Step 2: Configure Source Flows
+
+Go to **Source Flow**. Each Namespace automatically generates a Node-RED flow with dummy data.
+
+Update each flow to parse real data using Node-RED nodes:
+
+- **REST API** → Format JSON → Send to `Order/orderInfo`
+- **Modbus PLC** → Read status → Format JSON → Send to `Equipment/CNC1`
+- **Excel File** → Extract key rows → Format JSON → Send to `Quality/orderQualitylog`
+
+![nodered](./images/nodered.png)
+
+---
+
+### Step 3: Create Event Flow
+
+Using **Event Flow**, connect real-time order and quality data to the LLM and write results back to `Quality/qualityAnalysis`.
+![nodered](./images/event.png)
+
+At this point, you have completed a integration usecase using supOS.
+
+---
+
+## Experimental Features
+
+### supOS MCP
+
+Allows LLMs to access and interpret real-time UNS content via built-in MCP Server and Client.
+
+**Supported Tools**:
+
+1. `get-model-topic-tree`  
+   - Input:
+     - `key` (string): Fuzzy search keyword
+     - `ShowRec` (boolean): Number of records
+     - `type` (string): Search type (1 = text, 2 = tag)
+   - Output: Topic tree structure
+
+2. `get-model-topic-detail`  
+   - Input: `topic` (string)  
+   - Output: Topic metadata
+
+3. `get-topic-realtime-data`  
+   - Input: `topic` (string)  
+   - Output: Realtime data for the topic
+
+4. `get-all-topic-realtime-data`  
+   - Input: `topic` (string)  
+   - Output: Realtime data for all related topics
+
+---
+
+### GenUI
+
+After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to generate HTML apps via natural language — directly interacting with Namespace database tables.
+
+---
 ## Installation
 
 ### 1.Linux
@@ -86,17 +188,8 @@ This approach allows users to securely collect, analyze, and share data across m
 
 ## Contact
    - If you have questions, open an issue or email us.
-     
-# Contributors
+## Contributors
 
-We gratefully acknowledge the following individuals for their contributions to this project:
+We gratefully acknowledge the following individuals for their contributions:
 
-- **Wenhao Yu** – Architecture  
-- **Liebo** – UNS  
-- **Weipeng Dong** – FUXA  
-- **Kangxi & Lifang Sun** – Backend  
-- **Minghe Zhuang** – Node-RED  
-- **Wangji Xin** – Grafana  
-- **Fayue Zheng & Yue Yang** – Frontend, Generative UI  
-- **Yanqiu Liu** – McpClient  
-
+**Wenhao Yu**, **Liebo**, **Weipeng Dong**, **Kangxi**, **Lifang Sun**, **Minghe Zhuang**, **Wangji Xin**, **Fayue Zheng & Yue Yang**, **Yanqiu Liu**, **Dongdong An**, **Jianan Zhu**
