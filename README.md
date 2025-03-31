@@ -4,14 +4,17 @@
 
 ---
 
-## Introduction
-supOS is an open-source Industrial Internet of Things (IIoT) platform that integrates multiple open-source projects such as **Kong**, **Konga**, **Keycloak**, **Node-RED**, **EMQX**, **TDengine**, **TimescaleDB**, **MinIO**, **McpClient**, and **CopilotKit**. It aims to provide a comprehensive and modular solution for building and deploying modern IIoT applications.
+# Introduction
+
+**supOS** is an open-source Industrial Internet of Things (IIoT) platform built around the **Unified Namespace (UNS)** concept, ensuring flexible, free distribution of industrial data via MQTT. By integrating a diverse set of open-source services—such as Kong, EMQX, Node-RED, Keycloak, and TimescaleDB—supOS creates a modular foundation for real-time data handling, identity management, and event processing.
+
+This approach allows users to securely collect, analyze, and share data across machines, applications, and edge devices. Through **MQTT-based UNS**, any data point—from sensors on a factory floor to cloud-hosted analytics—becomes universally accessible. This architecture removes the need for tightly coupled, proprietary systems, thereby streamlining data flow and empowering rapid, scalable IIoT development.
 
 ## Platform Architecture
 
 ### Core Components
 
-- Microservices Architecture: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
+- UNS: Integrates various containers (e.g., backend, frontend, EMQX, Node-RED) to form a scalable and modular IIoT platform.
 - API Gateway & Management: Uses **Kong** for API management and **Konga** for UI-based control.
 - Edge & IoT Data Handling: **EMQX** for real-time MQTT messaging, **Node-RED** for low-code IoT development.
 - Database & Time-Series Storage: **PostgreSQL (TimescaleDB)** and **TDengine** for optimized time-series data handling.
