@@ -1,7 +1,5 @@
 # supOS: An Open-Source IIoT Platform
 
-[English](README.md) | [中文](README_zh.md)
-
 **supOS** is an open-source industrial data integration platform built on the **Unified Namespace (UNS)** methodology and powered by production-grade open-source technologies.
 
 ![arc](./image/arc.png)
