@@ -300,14 +300,14 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.2'
-        reservations:
-          memory: 1G
-          cpus: '0.1'
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+    #       cpus: '0.2'
+    #     reservations:
+    #       memory: 1G
+    #       cpus: '0.1'
     networks:
       - default_network
   kibana:
