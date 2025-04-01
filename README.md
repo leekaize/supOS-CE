@@ -7,7 +7,7 @@
 ---
 
 ## Architecture Overview
-![func](./image/func.png)
+![func](./image/func.jpg)
 
 - **Source Flow**  
   Serves as the connection pipeline to devices and systems. It handles real-time protocol translation into JSON payloads. Built entirely on Node-RED.
