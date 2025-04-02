@@ -525,6 +525,8 @@ services:
       - GITEA__server__SSH_DOMAIN=${ENTRANCE_PROTOCOL}
       - GITEA__server__SSH_PORT=2222
       - GITEA__security__INSTALL_LOCK=true
+      - GITEA__oauth2_client__ACCOUNT_LINKING=auto
+      - GITEA__oauth2_client__ENABLE_AUTO_REGISTRATION=true
     volumes:
       - ${VOLUMES_PATH}/gitea:/data
     networks:
