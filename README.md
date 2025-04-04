@@ -32,12 +32,14 @@
 
 > **Note**: supOS is theoretically compatible with any OS running Docker. Currently, it has only been tested on **Ubuntu Server 24.04**. Feedback on other environments is highly appreciated.
 
-1.  **Configure environment variables**  
+1.**Download the image**  
+   Clone the repository via Git . 
+   
+2.   **Configure environment variables**  
    Modify the `.env` file based on your deployment needs.
 
-
-2. **Download the image**  
-   Clone the repository via Git or download the release zip package. Run the installation script:
+3. **Run the script**  
+   Run the installation script:
    ```bash
    ./startup.sh
    ```
