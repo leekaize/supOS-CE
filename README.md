@@ -114,8 +114,7 @@ Allows LLMs to access and interpret real-time UNS content via built-in MCP Serve
    - Input: `topic` (string)  
    - Output: Realtime data for the topic
 
-4. `get-all-topic-realtime-data`  
-   - Input: `topic` (string)  
+4. `get-all-topic-realtime-data`
    - Output: Realtime data for all related topics
 
 ---
