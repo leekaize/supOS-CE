@@ -40,8 +40,8 @@
 
 3. **Run the script**  
    Run the installation script:
-   ```bash
-   ./startup.sh
+    ```bash
+   bash bin/startup.sh
    ```
 
 ---
