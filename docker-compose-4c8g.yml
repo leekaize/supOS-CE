@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: eco-registry.supos.com/sup9bnlh/supos-frontend-platform:1.0.5-T9
+    image: suposce/supos-ce-platform:1.0.5-T9
     container_name: frontend
     ports:
       - "3010:3000"
@@ -19,7 +19,7 @@ services:
     networks:
       - default_network
   backend:
-    image:  eco-registry.supos.com/sup9bnlh/backend:1.0.5-T9
+    image:  suposce/supos-ce-backend:1.0.5-T9
     container_name: backend
     environment:
       - MEM_OPTS=-Xms512m -Xmx1536m
@@ -392,7 +392,7 @@ services:
       - default_network
   fuxa:
     container_name: fuxa
-    image: eco-registry.supos.com/sup9bnlh/fuxa:1.0.5-T13
+    image: suposce/supos-ce-fuxa:1.0.5-T13
     profiles:
       - fuxa
     environment:
