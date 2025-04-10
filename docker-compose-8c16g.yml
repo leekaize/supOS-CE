@@ -153,6 +153,14 @@ services:
       - SUPOS_API_KEY=${SUPOS_API_KEY}
       - SUPOS_API_URL=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}
       - SUPOS_MQTT_URL=${SUPOS_MQTT_URL}
+    healthcheck:
+      test: >
+        /bin/bash -c "
+        exec 3<>/dev/tcp/localhost/3000"
+      start_period: 30s
+      timeout: 10s
+      interval: 30s
+      retries: 10
     networks:
       - default_network
   grafana:
