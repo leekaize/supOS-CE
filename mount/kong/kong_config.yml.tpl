@@ -1066,7 +1066,7 @@ routes:
   path_handling: v1
   regex_priority: 0
   tags:
-  - menu
+  - ${ENABLE_MCP}
   - parentName:menu.tag.appspace
   - description:menu.desc.mcpclient
   - sort:3
@@ -1910,7 +1910,7 @@ routes:
   regex_priority: 0
   tags:
   - description:menu.desc.dockerMgmt
-  - menu
+  - ${ENABLE_PORTAINER}
   - sort:6
   - parentName:menu.tag.system
   protocols:
