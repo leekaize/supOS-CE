@@ -14,8 +14,12 @@ fi
 export BASE_URL=$REDIRECT_BASE_URL
 if [ "$OS_RESOURCE_SPEC" == "1" ]; then
   export ENABLE_ELK=none
+  export ENABLE_PORTAINER=none
+  export ENABLE_MCP=none
 else
   export ENABLE_ELK=menu
+  export ENABLE_PORTAINER=menu
+  export ENABLE_MCP=menu
 fi
 
 # 输入文件（模板文件）和输出文件

@@ -18,10 +18,12 @@ module.exports = function (RED) {
         node.modelSchemaObj = null;
 
         if (config.modelSchema) {
+            config.modelSchema = config.modelSchema.replace(/\\/g, "\\\\");
             node.modelSchemaObj = JSON.parse(config.modelSchema);
         }
         node.modelMapping = null;
         if (config.modelMapping) {
+            config.modelMapping = config.modelMapping.replace(/\\/g, "\\\\");
             node.modelMapping = JSON.parse(config.modelMapping);
         }
 
@@ -261,20 +263,17 @@ module.exports = function (RED) {
             return {
                 "code": 200,
                 "isMultiple": false,
-                "data": {
-                    "_resource_": inputData
-                }
+                "data":  inputData
             }
         }
 
         function icmpDataTransfer(inputStatus) {
             let fixTime = new Date().getTime();
             var data = {
-                "_resource_": {
-                    "_ct": fixTime,
-                    "_qos": 0,
-                    "status": inputStatus === true ? 1 : 0
-                }
+                "_ct": fixTime,
+                "_qos": 0,
+                "status": inputStatus === true ? 1 : 0
+
             }
             return {
                 "code": 200,
@@ -333,10 +332,8 @@ module.exports = function (RED) {
             return {
                 "code": 200,
                 "isMultiple": false,
-                "data": {
-                    "_source_": inputData,
-                    "_resource_": newData
-                }
+                "data": newData
+
             }
             // return {
             //     "code": 200,
@@ -418,10 +415,7 @@ module.exports = function (RED) {
 
                 multipleVqt.push({
                     "topic": rebuildSendTopic(tp),
-                    "payload": {
-                        "_source_": inputPayload,
-                        "_resource_": vqt
-                    }
+                    "payload": vqt
                 });
             }
             return {
@@ -467,10 +461,8 @@ module.exports = function (RED) {
             return {
                 "code": 200,
                 "isMultiple": false,
-                "data": {
-                    "_source_": data,
-                    "_resource_": unsData
-                }
+                "data": unsData
+
             };
         };
 
@@ -507,10 +499,8 @@ module.exports = function (RED) {
             for (let k in vqtMap) {
                 multipleVqt.push({
                     "topic": rebuildSendTopic(k),
-                    "payload": {
-                        "_source_": inputArrayData,
-                        "_resource_": vqtMap[k]
-                    }
+                    "payload": vqtMap[k]
+
                 });
             }
             
@@ -561,10 +551,8 @@ module.exports = function (RED) {
 
                         multipleVqt.push({
                             "topic": rebuildSendTopic(fts[j].modelTopic),
-                            "payload": {
-                                "_source_": msg.payload,
-                                "_resource_": vqt
-                            }
+                            "payload": vqt
+
                         });
                     }
                 } else {
@@ -586,10 +574,7 @@ module.exports = function (RED) {
 
                         multipleVqt.push({
                             "topic": rebuildSendTopic(fts[j].modelTopic),
-                            "payload": {
-                                "_source_": msg.payload,
-                                "_resource_": vqt
-                            }
+                            "payload": vqt
                         });
                     }
                 } else {
@@ -626,10 +611,8 @@ module.exports = function (RED) {
             return {
                 "code": 200,
                 "isMultiple": false,
-                "data": {
-                    "_source_": msg.payload,
-                    "_resource_": vqt
-                }
+                "data": vqt
+
             };
     
         };
