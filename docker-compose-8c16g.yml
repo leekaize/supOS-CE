@@ -156,7 +156,7 @@ services:
     healthcheck:
       test: >
         /bin/bash -c "
-        exec 3<>/dev/tcp/localhost/3000"
+        exec 3<>/dev/tcp/localhost/8123"
       start_period: 30s
       timeout: 10s
       interval: 30s
