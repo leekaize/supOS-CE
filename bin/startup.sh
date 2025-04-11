@@ -9,6 +9,66 @@ source $SCRIPT_DIR/global/choose-profile-command.sh
 
 # 去掉回车等符号，避免出现^m
 sed -i 's/\r$//' $SCRIPT_DIR/../.env
+
+# 检测系统平台
+platform=$(uname -s)
+if [[ "$platform" == MINGW64* ]]; then
+    # Windows平台设置
+    sed -i \
+        -e "s/^OS_RESOURCE_SPEC=.*/OS_RESOURCE_SPEC=1/" \
+        -e "s/^OS_PLATFORM_TYPE=.*/OS_PLATFORM_TYPE=windows/" \
+        $SCRIPT_DIR/../.env
+
+    current_volumes_path=$(grep '^VOLUMES_PATH=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
+    default_volumes_path="/d/volumes/supos/data"
+    read -p "Enter VOLUMES_PATH [$default_volumes_path]: " volumes_path
+    volumes_path=${volumes_path:-$default_volumes_path}
+
+    if [ "$volumes_path" != "$current_volumes_path" ]; then
+      escaped_volumes_path=$(sed 's/[&]/\\&/g' <<< "$volumes_path")
+      sed -i "s|^VOLUMES_PATH=.*|VOLUMES_PATH=$escaped_volumes_path|" "$SCRIPT_DIR/../.env"
+    fi
+
+    current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
+    read -p "Enter IP address for ENTRANCE_DOMAIN [$current_entrance_domain]: " selected_ip
+    selected_ip=${selected_ip:-$current_entrance_domain}
+
+    if [ "$selected_ip" != "$current_entrance_domain" ]; then
+      escaped_selected_ip=$(sed 's/[&]/\\&/g' <<< "$selected_ip")
+      sed -i "s|^ENTRANCE_DOMAIN=.*|ENTRANCE_DOMAIN=$escaped_selected_ip|" "$SCRIPT_DIR/../.env"
+    fi
+else
+    # 非Windows平台获取本地IP地址(取前3个)
+    ips=($(hostname -I | awk '{print $1, $2, $3}'))
+    echo -e "\nAvailable options for ENTRANCE_DOMAIN:"
+    current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
+    echo "0). Keep current: $current_entrance_domain (default)"
+
+    for i in "${!ips[@]}"; do
+      echo "$((i+1))). ${ips[$i]}"
+    done
+
+    while true; do
+      read -p "Select option (0-${#ips[@]}), or press Enter to keep current: " choice
+
+      if [[ -z "$choice" ]] || [[ "$choice" == "0" ]]; then
+          selected_ip="$current_entrance_domain"
+          echo "Keeping current ENTRANCE_DOMAIN: $selected_ip"
+          break
+      elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#ips[@]}" ]; then
+        selected_ip=${ips[$((choice-1))]}
+        echo "Selected IP: $selected_ip"
+        break
+      else
+        echo "Invalid input. Please enter a valid option number (0-${#ips[@]}) or press Enter."
+      fi
+    done
+
+    if [ "$selected_ip" != "$current_entrance_domain" ]; then
+      escaped_selected_ip=$(sed 's/[&]/\\&/g' <<< "$selected_ip")
+      sed -i "s|^ENTRANCE_DOMAIN=.*|ENTRANCE_DOMAIN=$escaped_selected_ip|" "$SCRIPT_DIR/../.env"
+    fi
+fi
 cat $SCRIPT_DIR/../.env && echo -e "\n"
 read -p "Please confirm env properties, do you want to continue? (y/n): " confirmation
 
