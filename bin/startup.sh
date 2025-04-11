@@ -52,10 +52,26 @@ fi
 
 # 选择需要启动哪些服务
 if [ ! -f $VOLUMES_PATH/backend/system/active-services.txt ]; then 
-  command=$(chooseProfile)
+  if [ "$OS_RESOURCE_SPEC" == "1" ]; then
+    command=$(chooseProfile1)
+  else
+    command=$(chooseProfile2)
+  fi
 else 
   command=$(sed -n '2p' $VOLUMES_PATH/backend/system/active-services.txt)
 fi
+
+# 判断是否启用了ELK
+if echo "$command" | grep -q "elk"; then
+  echo "ENABLE_ELK=true" >> $SCRIPT_DIR/../.env.tmp
+  echo "ENABLE_ELK_MENU=menu" >> $SCRIPT_DIR/../.env.tmp
+else
+   echo "ENABLE_ELK=false" >> $SCRIPT_DIR/../.env.tmp
+   echo "ENABLE_ELK_MENU=none" >> $SCRIPT_DIR/../.env.tmp
+fi
+
+# 替换文件变量
+bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
 # 创建volumes目录, 将mount目录迁移到volumes目录
 if [ -d "$VOLUMES_PATH" ] && [ "$(ls -A $VOLUMES_PATH)" ]; then
