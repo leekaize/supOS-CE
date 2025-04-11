@@ -22,6 +22,7 @@ else
   export ENABLE_MCP=menu
 fi
 
+export $(grep -v '^#' $SCRIPT_DIR/../../.env.tmp | xargs)
 # 输入文件（模板文件）和输出文件
 TEMPLATE_FILE=$SCRIPT_DIR/../../mount/kong/kong_config.yml.tpl
 OUTPUT_FILE=$SCRIPT_DIR/../../mount/kong/kong_config.yml
