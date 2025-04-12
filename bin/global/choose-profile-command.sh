@@ -71,27 +71,27 @@ chooseProfile2() {
         profileCommand="--profile fuxa --profile grafana --profile minio --profile tdengine "
         activeServices+=",fuxa,grafana,minio,tdengine"
     else 
-        read -p "Step 1: fuxa? [y/n]: " choicefuxa
+        read -p "Step 1: install fuxa? [y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
         if [[ $choicefuxa =~ ^[Yy] ]]; then
             profileCommand="--profile fuxa "
             activeServices+=",fuxa"
         fi
 
-        read -p "Step 2: grafana[y/n]: " choicegrafana
+        read -p "Step 2: install grafana? [y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3: minio[y/n]: " choiceminio
+        read -p "Step 3: install minio? [y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
-        read -p "Step 4: elk[y/n]: " choiceelk
+        read -p "Step 4: install elasticsearch, kibana, filebeat? [y/n]: " choiceelk
         choiceelk=${choiceelk:-Y}
         if [[ $choiceelk =~ ^[Yy] ]]; then
             profileCommand+="--profile elk "
