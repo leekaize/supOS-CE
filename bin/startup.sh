@@ -15,7 +15,7 @@ platform=$(uname -s)
 if [[ "$platform" == MINGW64* ]]; then
     # Windows平台设置
     sed -i \
-        -e "s/^OS_RESOURCE_SPEC=.*/OS_RESOURCE_SPEC=1/" \
+#        -e "s/^OS_RESOURCE_SPEC=.*/OS_RESOURCE_SPEC=1/" \
         -e "s/^OS_PLATFORM_TYPE=.*/OS_PLATFORM_TYPE=windows/" \
         $SCRIPT_DIR/../.env
 
