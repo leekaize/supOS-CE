@@ -1,6 +1,6 @@
 #!/bin/bash
 
-activeServices="emqx,nodered,hasura,keycloak,kong,postgresql,gitea,chat2db,elasticsearch,portainer"
+activeServices="emqx,nodered,hasura,keycloak,kong,postgresql,chat2db,portainer"
 profileCommand=""
 OUTPUT_FILE=$SCRIPT_DIR/global/active-services.txt
 # ENV_TMP=$SCRIPT_DIR/../.env.tmp
@@ -13,26 +13,27 @@ chooseProfile1() {
     else
         read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes" askyou
     fi
+    askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile fuxa --profile grafana --profile minio --profile tdengine "
-        activeServices+=",fuxa,grafana,minio,tdengine"
+        profileCommand="--profile fuxa --profile grafana --profile tdengine "
+        activeServices+=",fuxa,grafana,tdengine"
     else
-        read -p "Step 1: fuxa? [y/n]: " choicefuxa
+        read -p "Step 1: Do you want to install Fuxa?[y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
         if [[ $choicefuxa =~ ^[Yy] ]]; then
             profileCommand="--profile fuxa "
             activeServices+=",fuxa"
         fi
 
-        read -p "Step 2: grafana[y/n]: " choicegrafana
+        read -p "Step 2: Do you want to install Grafana?[y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3: minio[y/n]: " choiceminio
+        read -p "Step 3:Do you want to install MinIO?[y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
@@ -56,6 +57,10 @@ chooseProfile1() {
         fi
 
     fi
+    echo $activeServices > $OUTPUT_FILE
+    echo $profileCommand >> $OUTPUT_FILE
+
+    echo $profileCommand;
 }
 
 chooseProfile2() {
@@ -66,32 +71,33 @@ chooseProfile2() {
     else 
         read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes" askyou
     fi
+    askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile fuxa --profile grafana --profile minio --profile tdengine "
-        activeServices+=",fuxa,grafana,minio,tdengine"
+        profileCommand="--profile fuxa --profile grafana --profile tdengine "
+        activeServices+=",fuxa,grafana,tdengine"
     else 
-        read -p "Step 1: install fuxa? [y/n]: " choicefuxa
+        read -p "Step 1: Do you want to install fuxa? [y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
         if [[ $choicefuxa =~ ^[Yy] ]]; then
             profileCommand="--profile fuxa "
             activeServices+=",fuxa"
         fi
 
-        read -p "Step 2: install grafana? [y/n]: " choicegrafana
+        read -p "Step 2: Do you want to install grafana? [y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3: install minio? [y/n]: " choiceminio
+        read -p "Step 3: Do you want to install minio? [y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
-        read -p "Step 4: install elasticsearch, kibana, filebeat? [y/n]: " choiceelk
+        read -p "Step 4: Do you want to install elasticsearch, kibana and filebeat? [y/n]: " choiceelk
         choiceelk=${choiceelk:-Y}
         if [[ $choiceelk =~ ^[Yy] ]]; then
             profileCommand+="--profile elk "
