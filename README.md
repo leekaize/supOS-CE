@@ -145,9 +145,9 @@ After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to gener
    git clone <this repo>
    ```
 2. **Modify the environment variables in the `.env` file**:
-   - Navigate to the `supos-ce-deploy` directory and edit the `.env` file.
+   - Navigate to the `supOS-CE` directory and edit the `.env` file.
    - Update `VOLUMES_PATH` (directory for storing project data).
-   - Update `ENTRANCE_DOMAIN` (frontend entry domain/IP address).
+   - Update `ENTRANCE_DOMAIN` (frontend entry domain/IP addressDo not use 127.0.0.1 or localhost, otherwise login and authentication functions will NOT work.)
    - Modify other variables as needed.
 
 3. **Start the project**:
@@ -170,9 +170,11 @@ After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to gener
    git clone <this repo>
    ```
 2. **Edit environment variables in the .env file**:
-   - VOLUMES_PATH (directory for storing project data)
-   - ENTRANCE_DOMAIN (Do not use 127.0.0.1)
-   - Any other required variables per your environment
+   - Navigate to the `supOS-CE` directory and edit the `.env` file.
+   - Update `OS_PLATFORM_TYPE` = windows
+   - Update `VOLUMES_PATH` (directory for storing project data).
+   - Update `ENTRANCE_DOMAIN`  (Do not use 127.0.0.1 or localhost, otherwise login and authentication functions will NOT work.)
+   - Other variables as required by the system.
 
 3. **Start the project**:
    ```bash
