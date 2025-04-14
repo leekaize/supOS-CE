@@ -174,6 +174,7 @@ echo -e "\n============================================================"
 echo -e "🎉  All services are up and running!"
 echo -e "👉  Open the platform in your browser:\n"
 echo -e "      $PLATFORM_URL\n"
+echo -e "    Default superadmin and password : supos/Supos@1304 \n"
 echo -e "============================================================"
 
 
