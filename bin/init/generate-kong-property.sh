@@ -1,18 +1,34 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# init‑kong.sh – Generate mount/kong/kong_config.yml from .env/.env.tmp
+# ---------------------------------------------------------------------------
+set -euo pipefail
 
-set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
-# 去掉回车等符号，避免出现^m
-sed -i 's/\r$//' $SCRIPT_DIR/../../.env
-# 设置.env环境变量
-export $(grep -v '^#' $SCRIPT_DIR/../../.env | xargs)
-REDIRECT_BASE_URL=$ENTRANCE_PROTOCOL://$ENTRANCE_DOMAIN:$ENTRANCE_PORT
-if [ $ENTRANCE_PORT == '80' ] || [ $ENTRANCE_PORT == '443' ]; then
-  REDIRECT_BASE_URL=$ENTRANCE_PROTOCOL://$ENTRANCE_DOMAIN
+# ---------------------------------------------------------------------------
+# 0. Normalise .env line endings (Windows → Unix)
+# ---------------------------------------------------------------------------
+sed -i 's/\r$//' "$SCRIPT_DIR/../../.env"
+
+# ---------------------------------------------------------------------------
+# 1. Load variables from .env
+# ---------------------------------------------------------------------------
+export $(grep -v '^#' "$SCRIPT_DIR/../../.env"      | xargs)
+
+# ---------------------------------------------------------------------------
+# 2. Build BASE_URL
+# ---------------------------------------------------------------------------
+REDIRECT_BASE_URL="$ENTRANCE_PROTOCOL://$ENTRANCE_DOMAIN:$ENTRANCE_PORT"
+if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
+  REDIRECT_BASE_URL="$ENTRANCE_PROTOCOL://$ENTRANCE_DOMAIN"
 fi
-export BASE_URL=$REDIRECT_BASE_URL
-if [ "$OS_RESOURCE_SPEC" == "1" ]; then
+export BASE_URL="$REDIRECT_BASE_URL"
+
+# ---------------------------------------------------------------------------
+# 3. Toggle optional stacks based on OS_RESOURCE_SPEC
+# ---------------------------------------------------------------------------
+if [[ "${OS_RESOURCE_SPEC:-0}" == "1" ]]; then
   export ENABLE_ELK=none
   export ENABLE_PORTAINER=none
   export ENABLE_MCP=none
@@ -22,14 +38,32 @@ else
   export ENABLE_MCP=menu
 fi
 
-export $(grep -v '^#' $SCRIPT_DIR/../../.env.tmp | xargs)
-# 输入文件（模板文件）和输出文件
-TEMPLATE_FILE=$SCRIPT_DIR/../../mount/kong/kong_config.yml.tpl
-OUTPUT_FILE=$SCRIPT_DIR/../../mount/kong/kong_config.yml
+# ---------------------------------------------------------------------------
+# 4. Authentication flag → KONG_AUTH_ENABLED
+#    (default to true if missing)
+# ---------------------------------------------------------------------------
+OS_AUTH_ENABLE=${OS_AUTH_ENABLE:-true}
 
-rm -f $OUTPUT_FILE
+if [[ "${OS_AUTH_ENABLE,,}" == "true" ]]; then
+  export KONG_AUTH_ENABLED=true
+else
+  export KONG_AUTH_ENABLED=false
+fi
 
-# 使用 envsubst 替换模板文件中的环境变量，并输出到新文件
+# ---------------------------------------------------------------------------
+# 5. Load .env.tmp overrides (if the file exists)
+# ---------------------------------------------------------------------------
+if [[ -f "$SCRIPT_DIR/../../.env.tmp" ]]; then
+  export $(grep -v '^#' "$SCRIPT_DIR/../../.env.tmp" | xargs)
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Render Kong configuration
+# ---------------------------------------------------------------------------
+TEMPLATE_FILE="$SCRIPT_DIR/../../mount/kong/kong_config.yml.tpl"
+OUTPUT_FILE="$SCRIPT_DIR/../../mount/kong/kong_config.yml"
+
+rm -f "$OUTPUT_FILE"
 envsubst < "$TEMPLATE_FILE" > "$OUTPUT_FILE"
 
-echo "Info: success to generate kong_config.yml"
+echo "Info: success to generate kong_config.yml (auth enabled = $KONG_AUTH_ENABLED)"

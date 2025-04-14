@@ -1954,7 +1954,7 @@ routes:
   preserve_host: false
   response_buffering: true
 plugins:
-- enabled: true
+- enabled: ${KONG_AUTH_ENABLED}
   instance_name: ~
   route: ~
   created_at: 1733799127

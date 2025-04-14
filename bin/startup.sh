@@ -7,13 +7,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 source $SCRIPT_DIR/global/log.sh
 source $SCRIPT_DIR/global/choose-profile-command.sh
 
-# 去掉回车等符号，避免出现^m
+# Remove symbols such as carriage returns to avoid ^m
 sed -i 's/\r$//' $SCRIPT_DIR/../.env
 
-# 检测系统平台
+# Inspection System Version
 platform=$(uname -s)
 if [[ "$platform" == MINGW64* ]]; then
-    # Windows平台设置
+    # Settings for Windows
     sed -i \
         -e "s/^OS_PLATFORM_TYPE=.*/OS_PLATFORM_TYPE=windows/" \
         $SCRIPT_DIR/../.env
@@ -37,7 +37,7 @@ if [[ "$platform" == MINGW64* ]]; then
       sed -i "s|^ENTRANCE_DOMAIN=.*|ENTRANCE_DOMAIN=$escaped_selected_ip|" "$SCRIPT_DIR/../.env"
     fi
 else
-    # 非Windows平台获取本地IP地址(取前3个)
+    # Non-Windows platform to get local IP address (take the first 3)
     ips=($(hostname -I | awk '{print $1, $2, $3}'))
     echo -e "\nAvailable options for ENTRANCE_DOMAIN:"
     current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
@@ -75,24 +75,33 @@ if [[ "$confirmation" != "y" && "$confirmation" != "Y" ]]; then
     exit 0
 fi
 
-# 检查ENTRANCE_DOMAIN是否为本地地址
+# Check if ENTRANCE_DOMAIN is a local address
 entrance_domain=$(grep -E '^ENTRANCE_DOMAIN=' $SCRIPT_DIR/../.env | sed -e 's/^ENTRANCE_DOMAIN=//' -e 's/[ "\t]//g')
-if [[ "$entrance_domain" == "127.0.0.1" ]]; then
-    echo -e "\n"
-    read -p "WARNING: Are you sure you want to visit the platform by 127.0.0.1? (y/n): " confirm_ip
-    if [[ "$confirm_ip" != "y" && "$confirm_ip" != "Y" ]]; then
-        exit 0
-    fi
-    echo -e "\n"
+if [[ "$entrance_domain" == "127.0.0.1" || "$entrance_domain" == "localhost" ]]; then
+  echo -e "\n"
+  read -rp "WARNING: You are using IP address 127.0.0.1/localhost. \
+Login and authentication functions will NOT work. \
+Proceed without login? (y/N): " confirm_ip
+  if [[ ! "$confirm_ip" =~ ^[yY]$ ]]; then
+    echo "Aborted."
+    exit 0
+  fi
+  # >>> Force authentication OFF for local deployments
+  # >>> Force authentication OFF for local deployments
+  sed -i -E \
+    -e 's/^OS_AUTH_ENABLE=.*/OS_AUTH_ENABLE=false/' \
+    "$SCRIPT_DIR/../.env"
+  echo "Authentication disabled because ENTRANCE_DOMAIN is local."
+  echo -e "\n"
 fi
 
-# 执行安装docker脚本
+# Execute the installation docker script
 bash $SCRIPT_DIR/install-deb/install-docker.sh
 
-# 设置.env环境变量
+# Setting the .env environment variable
 source $SCRIPT_DIR/../.env
 
-# 设置.env.tmp临时环境变量
+# Setting the .env.tmp temporary environment variable
 if [ "$LANGUAGE" == "zh-CN" ]; then
   echo "GRAFANA_LANG=zh-Hans" > $SCRIPT_DIR/../.env.tmp
   echo "FUXA_LANG=zh-cn" >> $SCRIPT_DIR/../.env.tmp
@@ -101,7 +110,7 @@ else
   echo "FUXA_LANG=en" >> $SCRIPT_DIR/../.env.tmp
 fi
 
-# 替换文件变量
+# Replace the file variable
 bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
 DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
@@ -109,7 +118,7 @@ if [ "$OS_RESOURCE_SPEC" == "1" ]; then
   DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-4c8g.yml
 fi
 
-# 选择需要启动哪些服务
+# Select which services need to be started
 if [ ! -f $VOLUMES_PATH/backend/system/active-services.txt ]; then 
   if [ "$OS_RESOURCE_SPEC" == "1" ]; then
     command=$(chooseProfile1)
@@ -120,7 +129,7 @@ else
   command=$(sed -n '2p' $VOLUMES_PATH/backend/system/active-services.txt)
 fi
 
-# 判断是否启用了ELK
+# Determine if ELK is enabled
 if echo "$command" | grep -q "elk"; then
   echo "ENABLE_ELK=true" >> $SCRIPT_DIR/../.env.tmp
   echo "ENABLE_ELK_MENU=menu" >> $SCRIPT_DIR/../.env.tmp
@@ -129,7 +138,7 @@ else
    echo "ENABLE_ELK_MENU=none" >> $SCRIPT_DIR/../.env.tmp
 fi
 
-# 替换文件变量
+# Replacement of file variables
 bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
 # 创建volumes目录, 将mount目录迁移到volumes目录
@@ -142,15 +151,31 @@ else
   bash $SCRIPT_DIR/init/create-volumes.sh $VOLUMES_PATH
 fi
 
-# 加载本地镜像
+# Load local images
 if [ -d "$SCRIPT_DIR/../images/" ] && [ "$(ls -A $SCRIPT_DIR/../images/)" ]; then
   bash $SCRIPT_DIR/init/load-images.sh
 fi
 
-# docker compose执行成功后，初始化node-red自定义节点
+# docker compose executed successfully, initialize node-red custom node, add Portainer oauth
 docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
 bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
 bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
 bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1
+bash $SCRIPT_DIR/init/portainer-init.sh
+
+
+if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
+  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}/home"
+else
+  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home"
+fi
+
+echo -e "\n============================================================"
+echo -e "🎉  All services are up and running!"
+echo -e "👉  Open the platform in your browser:\n"
+echo -e "      $PLATFORM_URL\n"
+echo -e "============================================================"
+
+
 
 rm -f $SCRIPT_DIR/../.env.tmp > /dev/null 2>&1

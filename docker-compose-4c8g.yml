@@ -201,6 +201,21 @@ services:
         condition: service_healthy  # 依赖 PostgreSQL 的健康状态
     networks:
       - default_network
+  portainer:
+    image: portainer/portainer-ce:2.23.0
+    container_name: portainer
+    environment:
+      service_logo: portainer.svg
+    command: --admin-password="$$2y$$05$$ZTAqF7Tn.hil8X.ifVmQTuKiJQoZDiKDW3t1lRR2/VPR06QoHv4AC"
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${VOLUMES_PATH}/portainer:/data
+    networks:
+      - default_network
   postgresql:
     image: timescale/timescaledb:2.18.2-pg17
     container_name: postgresql
