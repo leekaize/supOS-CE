@@ -30,9 +30,6 @@ if [ "$FORCE" = false ]; then
     echo "Deletion cancelled"
     exit 1
   fi
-  echo
-  warn "Removing all supOS data..."
-  echo
 fi
 
 # Safety check before deletion
@@ -40,6 +37,10 @@ if [[ -z "$VOLUMES_PATH" || "$VOLUMES_PATH" == "/" ]]; then
   error "VOLUMES_PATH is not set correctly. Aborting deletion."
   exit 1
 fi
+
+echo
+warn "Removing all supOS data..."
+echo
 
 rm -rf "$VOLUMES_PATH"
 warn "Cleanup completed"
