@@ -87,7 +87,6 @@ Proceed without login? (y/N): " confirm_ip
     exit 0
   fi
   # >>> Force authentication OFF for local deployments
-  # >>> Force authentication OFF for local deployments
   sed -i -E \
     -e 's/^OS_AUTH_ENABLE=.*/OS_AUTH_ENABLE=false/' \
     "$SCRIPT_DIR/../.env"
@@ -109,9 +108,6 @@ else
   echo "GRAFANA_LANG=en-US" > $SCRIPT_DIR/../.env.tmp
   echo "FUXA_LANG=en" >> $SCRIPT_DIR/../.env.tmp
 fi
-
-# Replace the file variable
-bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
 DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
 if [ "$OS_RESOURCE_SPEC" == "1" ]; then
