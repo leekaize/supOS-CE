@@ -177,27 +177,30 @@ if [ -d "$SCRIPT_DIR/../images/" ] && [ "$(ls -A $SCRIPT_DIR/../images/)" ]; the
   bash $SCRIPT_DIR/init/load-images.sh
 fi
 
-# docker compose executed successfully, initialize node-red custom node, add Portainer oauth
-docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
-bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
-bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
-bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1
-bash $SCRIPT_DIR/init/portainer-init.sh
 
+if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
+   bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
+   bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
+   bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1 && \
+   bash $SCRIPT_DIR/init/portainer-init.sh; then
 
-if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
-  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}/home"
+    echo -e "\n============================================================"
+    echo -e "🎉  All services are up and running!"
+    echo -e "👉  Open the platform in your browser:\n"
+
+    if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
+      PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}/home"
+    else
+      PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home"
+    fi
+
+    echo -e "      $PLATFORM_URL\n"
+    echo -e "    Default superadmin and password : supos/Supos@1304 \n"
+    echo -e "============================================================"
+
 else
-  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home"
+    echo -e "\n❌ ERROR: One or more steps failed during startup. Please check the logs above."
+    exit 1
 fi
-
-echo -e "\n============================================================"
-echo -e "🎉  All services are up and running!"
-echo -e "👉  Open the platform in your browser:\n"
-echo -e "      $PLATFORM_URL\n"
-echo -e "    Default superadmin and password : supos/Supos@1304 \n"
-echo -e "============================================================"
-
-
 
 rm -f $SCRIPT_DIR/../.env.tmp > /dev/null 2>&1
