@@ -20,7 +20,7 @@ if [[ "$platform" == MINGW64* ]]; then
 
     current_volumes_path=$(grep '^VOLUMES_PATH=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
     default_volumes_path="/d/volumes/supos/data"
-    read -p "Enter VOLUMES_PATH [$default_volumes_path]: " volumes_path
+    read -p "Choose VOLUMES_PATH: (Enter for default:[$default_volumes_path])" volumes_path
     volumes_path=${volumes_path:-$default_volumes_path}
 
     if [ "$volumes_path" != "$current_volumes_path" ]; then
@@ -28,9 +28,34 @@ if [[ "$platform" == MINGW64* ]]; then
       sed -i "s|^VOLUMES_PATH=.*|VOLUMES_PATH=$escaped_volumes_path|" "$SCRIPT_DIR/../.env"
     fi
 
-    current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
-    read -p "Enter IP address for ENTRANCE_DOMAIN [$current_entrance_domain]: " selected_ip
-    selected_ip=${selected_ip:-$current_entrance_domain}
+    # 读取 .env 中的 ENTRANCE_DOMAIN 值
+current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2- | tr -d '[:space:]')
+
+# 判断是否存在默认值
+if [[ -n "$current_entrance_domain" ]]; then
+    # 有默认值，允许回车使用
+    while true; do
+        read -p "Choose IP address for ENTRANCE_DOMAIN (Enter for default: [$current_entrance_domain]): " selected_ip
+        selected_ip=${selected_ip:-$current_entrance_domain}
+
+        if [[ -z "$selected_ip" ]]; then
+            echo "Input cannot be empty. Please enter a valid IP."
+        else
+            break
+        fi
+    done
+else
+    # 没有默认值，强制输入
+    while true; do
+        read -p "Choose IP address for ENTRANCE_DOMAIN: " selected_ip
+        if [[ -z "$selected_ip" ]]; then
+            echo "Input cannot be empty. Please enter a valid IP."
+        else
+            break
+        fi
+    done
+fi
+
 
     if [ "$selected_ip" != "$current_entrance_domain" ]; then
       escaped_selected_ip=$(sed 's/[&]/\\&/g' <<< "$selected_ip")
@@ -87,7 +112,6 @@ Proceed without login? (y/N): " confirm_ip
     exit 0
   fi
   # >>> Force authentication OFF for local deployments
-  # >>> Force authentication OFF for local deployments
   sed -i -E \
     -e 's/^OS_AUTH_ENABLE=.*/OS_AUTH_ENABLE=false/' \
     "$SCRIPT_DIR/../.env"
@@ -109,9 +133,6 @@ else
   echo "GRAFANA_LANG=en-US" > $SCRIPT_DIR/../.env.tmp
   echo "FUXA_LANG=en" >> $SCRIPT_DIR/../.env.tmp
 fi
-
-# Replace the file variable
-bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
 DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
 if [ "$OS_RESOURCE_SPEC" == "1" ]; then
