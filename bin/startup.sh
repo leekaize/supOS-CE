@@ -68,12 +68,6 @@ else
       sed -i "s|^ENTRANCE_DOMAIN=.*|ENTRANCE_DOMAIN=$escaped_selected_ip|" "$SCRIPT_DIR/../.env"
     fi
 fi
-cat $SCRIPT_DIR/../.env && echo -e "\n"
-read -p "Please confirm env properties, do you want to continue? (y/n): " confirmation
-
-if [[ "$confirmation" != "y" && "$confirmation" != "Y" ]]; then
-    exit 0
-fi
 
 # Check if ENTRANCE_DOMAIN is a local address
 entrance_domain=$(grep -E '^ENTRANCE_DOMAIN=' $SCRIPT_DIR/../.env | sed -e 's/^ENTRANCE_DOMAIN=//' -e 's/[ "\t]//g')
@@ -101,14 +95,6 @@ bash $SCRIPT_DIR/install-deb/install-docker.sh
 # Setting the .env environment variable
 source $SCRIPT_DIR/../.env
 
-# Replace the file variable
-bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
-
-DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
-if [ "$OS_RESOURCE_SPEC" == "1" ]; then
-  DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-4c8g.yml
-fi
-
 # Select which services need to be started
 if [ ! -f $VOLUMES_PATH/backend/system/active-services.txt ]; then 
   if [ "$OS_RESOURCE_SPEC" == "1" ]; then
@@ -120,7 +106,12 @@ else
   command=$(sed -n '2p' $VOLUMES_PATH/backend/system/active-services.txt)
 fi
 
-bash  $SCRIPT_DIR/util/append-tempenv.sh $command
+bash $SCRIPT_DIR/util/append-tempenv.sh "$command"
+
+DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
+if [ "$OS_RESOURCE_SPEC" == "1" ]; then
+  DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-4c8g.yml
+fi
 
 # Replacement of file variables
 bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
