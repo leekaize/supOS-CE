@@ -20,7 +20,7 @@ if [[ "$platform" == MINGW64* ]]; then
 
     current_volumes_path=$(grep '^VOLUMES_PATH=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
     default_volumes_path="/d/volumes/supos/data"
-    read -p "Enter VOLUMES_PATH [$default_volumes_path]: " volumes_path
+    read -p "Choose VOLUMES_PATH: (Enter for default:[$default_volumes_path])" volumes_path
     volumes_path=${volumes_path:-$default_volumes_path}
 
     if [ "$volumes_path" != "$current_volumes_path" ]; then
@@ -28,9 +28,38 @@ if [[ "$platform" == MINGW64* ]]; then
       sed -i "s|^VOLUMES_PATH=.*|VOLUMES_PATH=$escaped_volumes_path|" "$SCRIPT_DIR/../.env"
     fi
 
+    # 读取 .env 中的 ENTRANCE_DOMAIN 值，并清理首尾空格
     current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
-    read -p "Enter IP address for ENTRANCE_DOMAIN [$current_entrance_domain]: " selected_ip
-    selected_ip=${selected_ip:-$current_entrance_domain}
+    current_entrance_domain=$(echo "$current_entrance_domain" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    sed -i "s/^ENTRANCE_DOMAIN=.*/ENTRANCE_DOMAIN=$current_entrance_domain/" "$SCRIPT_DIR/../.env"
+
+# 判断是否存在默认值
+if [[ -n "$current_entrance_domain" ]]; then
+    # 有默认值，允许回车使用
+    while true; do
+        read -p "Choose IP address for ENTRANCE_DOMAIN (Enter for default: [$current_entrance_domain]): " selected_ip
+        selected_ip=$(echo "$selected_ip" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        selected_ip=${selected_ip:-$current_entrance_domain}
+
+        if [[ -z "$selected_ip" ]]; then
+            echo "Input cannot be empty. Please enter a valid IP."
+        else
+            break
+        fi
+    done
+else
+    # 没有默认值，强制输入
+    while true; do
+        read -p "Choose IP address for ENTRANCE_DOMAIN: " selected_ip
+            selected_ip=$(echo "$selected_ip" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        if [[ -z "$selected_ip" ]]; then
+            echo "Input cannot be empty. Please enter a valid IP."
+        else
+            break
+        fi
+    done
+fi
+
 
     if [ "$selected_ip" != "$current_entrance_domain" ]; then
       escaped_selected_ip=$(sed 's/[&]/\\&/g' <<< "$selected_ip")
@@ -41,6 +70,8 @@ else
     ips=($(hostname -I | awk '{print $1, $2, $3}'))
     echo -e "\nAvailable options for ENTRANCE_DOMAIN:"
     current_entrance_domain=$(grep '^ENTRANCE_DOMAIN=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
+    current_entrance_domain=$(echo "$current_entrance_domain" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    sed -i "s/^ENTRANCE_DOMAIN=.*/ENTRANCE_DOMAIN=$current_entrance_domain/" "$SCRIPT_DIR/../.env"
     echo "0). Keep current: $current_entrance_domain (default)"
 
     for i in "${!ips[@]}"; do
@@ -69,8 +100,9 @@ else
     fi
 fi
 
-# Check if ENTRANCE_DOMAIN is a local address
+# Check if ENTRANCE_DOMAIN is a local loopback address
 entrance_domain=$(grep -E '^ENTRANCE_DOMAIN=' $SCRIPT_DIR/../.env | sed -e 's/^ENTRANCE_DOMAIN=//' -e 's/[ "\t]//g')
+entrance_domain=$(echo "$entrance_domain" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 if [[ "$entrance_domain" == "127.0.0.1" || "$entrance_domain" == "localhost" ]]; then
   echo -e "\n"
   read -rp "WARNING: You are using IP address 127.0.0.1/localhost. \
@@ -80,7 +112,6 @@ Proceed without login? (y/N): " confirm_ip
     echo "Aborted."
     exit 0
   fi
-  # >>> Force authentication OFF for local deployments
   # >>> Force authentication OFF for local deployments
   sed -i -E \
     -e 's/^OS_AUTH_ENABLE=.*/OS_AUTH_ENABLE=false/' \
@@ -131,27 +162,30 @@ if [ -d "$SCRIPT_DIR/../images/" ] && [ "$(ls -A $SCRIPT_DIR/../images/)" ]; the
   bash $SCRIPT_DIR/init/load-images.sh
 fi
 
-# docker compose executed successfully, initialize node-red custom node, add Portainer oauth
-docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
-bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
-bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
-bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1
-bash $SCRIPT_DIR/init/portainer-init.sh
 
+if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
+   bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
+   bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
+   bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1 && \
+   bash $SCRIPT_DIR/init/portainer-init.sh; then
 
-if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
-  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}/home"
+    echo -e "\n============================================================"
+    echo -e "🎉  All services are up and running!"
+    echo -e "👉  Open the platform in your browser:\n"
+
+    if [[ "$ENTRANCE_PORT" == "80" || "$ENTRANCE_PORT" == "443" ]]; then
+      PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}/home"
+    else
+      PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home"
+    fi
+
+    echo -e "      $PLATFORM_URL\n"
+    echo -e "    Default superadmin and password : supos/Supos@1304 \n"
+    echo -e "============================================================"
+
 else
-  PLATFORM_URL="${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home"
+    echo -e "\n❌ ERROR: One or more steps failed during startup. Please check the logs above."
+    exit 1
 fi
-
-echo -e "\n============================================================"
-echo -e "🎉  All services are up and running!"
-echo -e "👉  Open the platform in your browser:\n"
-echo -e "      $PLATFORM_URL\n"
-echo -e "    Default superadmin and password : supos/Supos@1304 \n"
-echo -e "============================================================"
-
-
 
 rm -f $SCRIPT_DIR/../.env.tmp > /dev/null 2>&1
