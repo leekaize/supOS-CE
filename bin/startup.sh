@@ -101,15 +101,6 @@ bash $SCRIPT_DIR/install-deb/install-docker.sh
 # Setting the .env environment variable
 source $SCRIPT_DIR/../.env
 
-# Setting the .env.tmp temporary environment variable
-if [ "$LANGUAGE" == "zh-CN" ]; then
-  echo "GRAFANA_LANG=zh-Hans" > $SCRIPT_DIR/../.env.tmp
-  echo "FUXA_LANG=zh-cn" >> $SCRIPT_DIR/../.env.tmp
-else
-  echo "GRAFANA_LANG=en-US" > $SCRIPT_DIR/../.env.tmp
-  echo "FUXA_LANG=en" >> $SCRIPT_DIR/../.env.tmp
-fi
-
 # Replace the file variable
 bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
 
@@ -129,14 +120,7 @@ else
   command=$(sed -n '2p' $VOLUMES_PATH/backend/system/active-services.txt)
 fi
 
-# Determine if ELK is enabled
-if echo "$command" | grep -q "elk"; then
-  echo "ENABLE_ELK=true" >> $SCRIPT_DIR/../.env.tmp
-  echo "ENABLE_ELK_MENU=menu" >> $SCRIPT_DIR/../.env.tmp
-else
-   echo "ENABLE_ELK=false" >> $SCRIPT_DIR/../.env.tmp
-   echo "ENABLE_ELK_MENU=none" >> $SCRIPT_DIR/../.env.tmp
-fi
+bash  $SCRIPT_DIR/util/append-tempenv.sh $command
 
 # Replacement of file variables
 bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh

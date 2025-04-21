@@ -142,6 +142,8 @@ services:
       - default_network
   mcpclient:
     container_name: mcpclient
+    profiles:
+      - mcpclient
     image: suposce/supos-ce-mcpclient:latest
     ports:
       - "32893:3000"

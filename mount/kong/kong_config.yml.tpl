@@ -702,7 +702,7 @@ routes:
   path_handling: v1
   regex_priority: 0
   tags:
-  - menu
+  - ${ENABLE_GITEA_MENU}
   - description:menu.desc.genApps
   - sort:2
   - parentName:menu.tag.appspace
@@ -1066,7 +1066,7 @@ routes:
   path_handling: v1
   regex_priority: 0
   tags:
-  - ${ENABLE_MCP}
+  - ${ENABLE_MCP_MENU}
   - parentName:menu.tag.appspace
   - description:menu.desc.mcpclient
   - sort:3
@@ -1446,7 +1446,7 @@ routes:
   path_handling: v1
   regex_priority: 0
   tags:
-  - menu
+  - none
   - description:menu.desc.generativeUI
   - parentName:menu.tag.appspace
   - sort:2
@@ -1910,7 +1910,7 @@ routes:
   regex_priority: 0
   tags:
   - description:menu.desc.dockerMgmt
-  - ${ENABLE_PORTAINER}
+  - ${ENABLE_PORTAINER_MENU}
   - sort:6
   - parentName:menu.tag.system
   protocols:

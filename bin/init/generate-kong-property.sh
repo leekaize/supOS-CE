@@ -26,20 +26,7 @@ fi
 export BASE_URL="$REDIRECT_BASE_URL"
 
 # ---------------------------------------------------------------------------
-# 3. Toggle optional stacks based on OS_RESOURCE_SPEC
-# ---------------------------------------------------------------------------
-if [[ "${OS_RESOURCE_SPEC:-0}" == "1" ]]; then
-  export ENABLE_ELK=none
-  export ENABLE_PORTAINER=none
-  export ENABLE_MCP=none
-else
-  export ENABLE_ELK=menu
-  export ENABLE_PORTAINER=menu
-  export ENABLE_MCP=menu
-fi
-
-# ---------------------------------------------------------------------------
-# 4. Authentication flag → KONG_AUTH_ENABLED
+# 3. Authentication flag → KONG_AUTH_ENABLED
 #    (default to true if missing)
 # ---------------------------------------------------------------------------
 OS_AUTH_ENABLE=${OS_AUTH_ENABLE:-true}
@@ -51,7 +38,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Load .env.tmp overrides (if the file exists)
+# 4. Load .env.tmp overrides (if the file exists)
 # ---------------------------------------------------------------------------
 if [[ -f "$SCRIPT_DIR/../../.env.tmp" ]]; then
   export $(grep -v '^#' "$SCRIPT_DIR/../../.env.tmp" | xargs)

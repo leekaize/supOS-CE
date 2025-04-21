@@ -143,6 +143,8 @@ services:
   mcpclient:
     container_name: mcpclient
     image: suposce/supos-ce-mcpclient:latest
+    profiles:
+      - mcpclient
     ports:
       - "32893:3000"
       - "32894:8123"
@@ -525,6 +527,8 @@ services:
   gitea:
     image: gitea/gitea:latest
     container_name: gitea
+    profiles:
+      - gitea
     ports:
       - "3030:3000"
       - "2222:22"
@@ -551,6 +555,8 @@ services:
   runner:
     image: gitea/act_runner:nightly
     container_name: gitea_runner
+    profiles:
+      - gitea
     environment:
       CONFIG_FILE: /config.yaml
       GITEA_INSTANCE_URL: "http://gitea:3000"  # Your Gitea server URL

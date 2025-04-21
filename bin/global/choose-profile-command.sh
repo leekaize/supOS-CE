@@ -9,15 +9,15 @@ chooseProfile1() {
 
     echo -e "\n"
     if [[ "$LANGUAGE" == "zh-CN" ]]; then
-        read -p "您是否需要自定义安装哪些服务? [1] 不，使用默认配置即可(默认) [2] 是的，我要选择" askyou
+        read -p "您是否需要自定义安装哪些服务? [1] 不，使用默认配置即可(默认) [2] 是的，我要选择 " askyou
     else
-        read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes" askyou
+        read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes " askyou
     fi
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile fuxa --profile grafana --profile tdengine "
-        activeServices+=",fuxa,grafana,tdengine"
+        profileCommand+="--profile grafana --profile tdengine "
+        activeServices+=",grafana,tdengine"
     else
         read -p "Step 1: Do you want to install Fuxa?[y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
@@ -39,11 +39,17 @@ chooseProfile1() {
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
+        read -p "Step 4: Do you want to install MCP-Client?[y/n]: " choicemcp
+        choicemcp=${choicemcp:-Y}
+        if [[ $choicemcp =~ ^[Yy] ]]; then
+            profileCommand+="--profile mcpclient "
+            activeServices+=",mcpclient"
+        fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 4: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB" choicedb
+            read -p "Step 5: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB " choicedb
         else
-            read -p "Step 4: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB" choicedb
+            read -p "Step 5: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
@@ -67,15 +73,15 @@ chooseProfile2() {
 
     echo -e "\n"
     if [[ "$LANGUAGE" == "zh-CN" ]]; then
-        read -p "您是否需要自定义安装哪些服务? [1] 不，使用默认配置即可(默认) [2] 是的，我要选择" askyou
+        read -p "您是否需要自定义安装哪些服务? [1] 不，使用默认配置即可(默认) [2] 是的，我要选择 " askyou
     else 
-        read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes" askyou
+        read -p "Do you need to customize which services to install? [1] No, use defaults(default) [2] Yes " askyou
     fi
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile fuxa --profile grafana --profile tdengine "
-        activeServices+=",fuxa,grafana,tdengine"
+        profileCommand="--profile grafana --profile tdengine "
+        activeServices+=",grafana,tdengine"
     else 
         read -p "Step 1: Do you want to install fuxa? [y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
@@ -102,11 +108,23 @@ chooseProfile2() {
         if [[ $choiceelk =~ ^[Yy] ]]; then
             profileCommand+="--profile elk "
         fi
+        read -p "Step 5: Do you want to install MCP-Client?[y/n]: " choicemcp
+        choicemcp=${choicemcp:-Y}
+        if [[ $choicemcp =~ ^[Yy] ]]; then
+            profileCommand+="--profile mcpclient "
+            activeServices+=",mcpclient"
+        fi
+        read -p "Step 6: Do you want to install Gitea?[y/n]: " choiceGitea
+        choiceGitea=${choiceGitea:-Y}
+        if [[ $choiceGitea =~ ^[Yy] ]]; then
+            profileCommand+="--profile gitea "
+            activeServices+=",gitea"
+        fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 5: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB" choicedb
+            read -p "Step 7: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB " choicedb
         else 
-            read -p "Step 5: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB" choicedb
+            read -p "Step 7: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
