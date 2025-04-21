@@ -66,11 +66,16 @@ services:
       - ${VOLUMES_PATH}/backend/system:/data/system
       - ${VOLUMES_PATH}/backend/log:/logs
     depends_on:
-      - postgresql
-      - emqx
-      - nodered
-      - keycloak
-      - chat2db
+      postgresql:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      emqx:
+        condition: service_started
+      nodered:
+        condition: service_started
+      chat2db:
+        condition: service_started
     networks:
       - default_network
   emqx:
