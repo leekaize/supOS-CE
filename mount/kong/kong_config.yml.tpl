@@ -830,7 +830,7 @@ routes:
   path_handling: v1
   regex_priority: 0
   tags:
-  - menu
+  - none
   - parentName:menu.tag.devtools
   - description:menu.desc.alert
   - sort:2
