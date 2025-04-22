@@ -677,7 +677,7 @@ routes:
   - description:menu.desc.cicd
   - sort:1
   - parentName:menu.tag.devtools
-  - menu
+  - ${ENABLE_GITEA_MENU}
   protocols:
   - http
   - https
