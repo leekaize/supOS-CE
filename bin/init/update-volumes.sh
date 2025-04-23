@@ -21,10 +21,14 @@ cp -r $SCRIPT_DIR/../../mount/grafana/data/plugins/* $VOLUMES_PATH/grafana/data/
 cp -r $SCRIPT_DIR/../../mount/keycloak/theme/* $VOLUMES_PATH/keycloak/theme/
 cp -r $SCRIPT_DIR/../../mount/kong/* $VOLUMES_PATH/kong/
 cp $SCRIPT_DIR/../../mount/emqx/config/* $VOLUMES_PATH/emqx/config/
+
 rm -rf $VOLUMES_PATH/node-red/.npm && cp -r $SCRIPT_DIR/../../mount/node-red/.npm  $VOLUMES_PATH/node-red/
-cp -r $SCRIPT_DIR/../../mount/node-red/* $VOLUMES_PATH/node-red/
+cp -r $SCRIPT_DIR/../../mount/node-red/offline_modules/* $VOLUMES_PATH/node-red/offline_modules/
+cp -r $SCRIPT_DIR/../../mount/node-red/themes/* $VOLUMES_PATH/node-red/themes/
+cp -r $SCRIPT_DIR/../../mount/node-red/override/* $VOLUMES_PATH/node-red/override/
 mkdir -p $VOLUMES_PATH/eventflow/ && cp -r $SCRIPT_DIR/../../mount/eventflow/* $VOLUMES_PATH/eventflow/
 rm -rf $VOLUMES_PATH/eventflow/.npm && cp -r $SCRIPT_DIR/../../mount/eventflow/.npm  $VOLUMES_PATH/eventflow/
+
 cp -r $SCRIPT_DIR/../../mount/filebeat/*.yml $VOLUMES_PATH/filebeat/
 cp -r $SCRIPT_DIR/../../mount/postgresql/* $VOLUMES_PATH/postgresql/
 cp -r $SCRIPT_DIR/../../mount/backend/log/topology.log $VOLUMES_PATH/backend/log/topology.log
