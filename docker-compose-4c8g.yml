@@ -19,7 +19,7 @@ services:
     networks:
       - default_network
   backend:
-    image:  suposce/supos-ce-backend:1.0.5-T9
+    image:  suposce/supos-ce-backend:1.0.5-T10
     container_name: backend
     environment:
       - MEM_OPTS=-Xms512m -Xmx1536m
