@@ -99,6 +99,7 @@ At this point, you have completed a integration usecase using supOS.
 ### supOS MCP 
 
 (During installation, you need to select to install MCP)
+
 Allows LLMs to access and interpret real-time UNS content via built-in MCP Server and Client.
 
 **Supported Tools**:
@@ -126,6 +127,7 @@ Allows LLMs to access and interpret real-time UNS content via built-in MCP Serve
 ### GenUI
 
 (Don't need to install it, but it is currently hidden on the menu page, and you need to manually add the menu tag to the router for genUI and genApp in konga)
+
 After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to generate HTML apps via natural language — directly interacting with Namespace database tables.
 
 ---
