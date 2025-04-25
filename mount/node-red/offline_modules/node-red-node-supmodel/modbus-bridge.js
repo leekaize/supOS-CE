@@ -15,7 +15,7 @@ class ModbusBridge {
         this.queue = q.newQueue();
 
         this.timer = setInterval(() => {
-            let newMsg = queue.poll();
+            let newMsg = this.queue.poll();
             if (newMsg != null) {
                 node.send([newMsg, null])
             }

@@ -18,19 +18,13 @@ class OpcuaBridge {
     constructor(node, mappings, interval) {
         this.queue = q.newQueue();
         this.mappings = mappings;
-        // 往平台推送数据的topic
-        let plantTopic = `4174348a-9222-4e81-b33e-5d72d2fd7f1e`
 
         this.timer = setInterval(() => {
-            let payloads = aggregate(this.queue, mappings);
-            if (payloads.length > 0) {
-                let newMsg = {
-                    "topic": plantTopic,
-                    "payload": payloads
-                }
+            let newMsg = this.queue.poll();
+            if (newMsg != null) {
                 node.send([newMsg, null])
             }
-        }, interval); // 100毫秒推送一次
+        }, interval); // 5毫秒轮询队列里的数据，每次只取一个topic发送
 
         // this.topologyTimer = setInterval(() => {
         //     fs.unlink(this.topologyFile, (err) => {
