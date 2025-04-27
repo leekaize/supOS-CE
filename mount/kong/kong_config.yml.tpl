@@ -673,11 +673,12 @@ routes:
   - description:menu.desc.cicd
   - sort:1
   - parentName:menu.tag.devtools
-  - menu
+  - ${ENABLE_GITEA_MENU}
   path_handling: v1
   created_at: 1730254514
   sources: ~
   hosts: ~
+
   protocols:
   - http
   - https

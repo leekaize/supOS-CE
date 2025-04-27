@@ -198,6 +198,7 @@ services:
       GF_DATABASE_NAME: grafana
       GF_DATABASE_USER: postgres
       GF_DATABASE_PASSWORD: postgres
+    restart: always
     depends_on:
       postgresql:
         condition: service_healthy  # 依赖 PostgreSQL 的健康状态
