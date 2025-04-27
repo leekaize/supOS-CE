@@ -310,7 +310,7 @@
             data.map((row, index) => {
                         let start  = (pagenation.pageNo - 1) * pagenation.pageItem;
                         let id = start + index + 1;
-                        return `<tr><td>${id}</td>${row.map(cell => `<td title="${cell || ''}">${cell || ''}</td>`).join('')}<td><i class="fa fa-pencil edit" style="margin-right: 10px;"></i><i class="fa fa-remove remove"></i></dt></tr>`
+                        return `<tr><td>${id}</td>${row.map(cell => `<td title="${cell==null?'':cell}">${cell==null?'':cell}</td>`).join('')}<td><i class="fa fa-pencil edit" style="margin-right: 10px;"></i><i class="fa fa-remove remove"></i></dt></tr>`
                     }
             ).join('')
         );
@@ -486,7 +486,7 @@
             const [topic, name, alias, fname, ftype, tag] = rowsData[i];
             let index = Number(i) + Number(1);
             // 校验必填字段
-            if (!name || !fname || !ftype || !tag) {
+            if (!name || !fname || !ftype || tag==null || tag==undefined) {
                 return node._("supmodel.label_serial") + ` ${index} ` + node._("supmodel.label_data_error") + ": "  + node._("supmodel.error_require_field")
             }
             // 校验folder path不能以/开头
@@ -531,7 +531,7 @@
                 "alias": alias || '',
                 "fieldName": fname,
                 "fieldType": ftype,
-                "tag": tag
+                "tag": tag+''
             } 
             unsDataArray.push(unsData);
         }
