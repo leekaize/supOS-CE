@@ -16,6 +16,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_MODEL=${OPENAI_API_MODEL}
       - REACT_APP_OS_LANG=${LANGUAGE}
+      - AGENT_DEPLOYMENT_URL=${AGENT_DEPLOYMENT_URL}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
     networks:
       - default_network
   backend:
