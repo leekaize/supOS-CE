@@ -42,6 +42,9 @@ docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-c
 docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-contrib-omron-fins@0.5.0" \
 || error "node-red install OMRON fins failed!"
 
+docker exec $2 sh -c "npm install --unsafe-perm /data/offline_modules/modules/node-xlsx-0.24.0.tgz"  >/dev/null
+docker exec $2 sh -c "npm install --unsafe-perm /data/offline_modules/modules/formidable-3.5.3.tgz"  >/dev/null
+
 docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-contrib-ui-ping@1.0.0" \
 || error "node-red install ui-ping failed!"
 
@@ -51,8 +54,8 @@ docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-c
 docker exec $2 sh -c "cd /data && npm install $3 --offline --prefix /data /data/offline_modules/node-red-node-supmodel" \
 || error "node-red install supmodel failed!"
 
-docker exec $2 sh -c "cd /data && npm install $3 --offline --prefix /data /data/offline_modules/node-red-node-model-converter" \
-|| error "node-red install model-converter failed!"
+# docker exec $2 sh -c "cd /data && npm install $3 --offline --prefix /data /data/offline_modules/node-red-node-model-converter" \
+# || error "node-red install model-converter failed!"
 
 # overide js file
 docker exec $2 sh -c 'cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/' >/dev/null

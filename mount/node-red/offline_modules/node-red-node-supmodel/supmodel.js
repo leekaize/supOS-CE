@@ -1,621 +1,221 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+
+const opcua = require('./opcua-bridge');
+const opcda = require('./opcda-bridge');
+const modbus = require('./modbus-bridge');
+const mock = require('./mock-bridge');
+const custom = require('./custom-bridge');
+const xlsx = require('node-xlsx');
+const fs = require("fs");
+const path = require("path");
+const formidable = require("formidable");
 
 module.exports = function (RED) {
 
-    function SelectModel(config) {
-        // 模型定义数据
-        let restQueryPageStartKey = '';
-        let restQueryPageStartValue = '0';
+    const httpNode = RED.httpNode;
 
-        RED.nodes.createNode(this, config);
+    const storagePath = '/data/cache/context/global/global.json';
 
-        const node = this;
+    const templateCN = '/data/template/template-cn.xlsx';
+    const templateEN = '/data/template/template-en.xlsx';
 
-        node.intervalId="";
-        node.selectedModel = config.selectedModel || "";
-        node.modelSchemaObj = null;
-
-        if (config.modelSchema) {
-            config.modelSchema = config.modelSchema.replace(/\\/g, "\\\\");
-            node.modelSchemaObj = JSON.parse(config.modelSchema);
+    // 下载模板文件
+    httpNode.get('/nodered-api/download/template', (req, res) => {
+        const language = process.env.OS_LANG;
+        console.log("当前语言设置： {}", language);
+        if (language == 'en-US') {
+            res.download(templateEN); // 自动处理响应头与文件流
+        } else {
+            res.download(templateCN);
         }
-        node.modelMapping = null;
-        if (config.modelMapping) {
-            config.modelMapping = config.modelMapping.replace(/\\/g, "\\\\");
-            node.modelMapping = JSON.parse(config.modelMapping);
-        }
+    });
+    // 导入excel
+    httpNode.post('/nodered-api/upload/tags', (req, res) => {
+        
+        const form = new formidable.IncomingForm();
+        form.uploadDir = "/data/uploads"; // 设置上传目录
+        form.keepExtensions = true; // 保留文件扩展名
 
-        if (node.selectedModel) {
-            // console.log("1================================================>>>\n")
-            // console.log(node.modelSchema);
-            // console.log("<<<================================================1\n")
-
-            var protocol = "";
-            if (node.modelSchemaObj?.protocol?.protocol) {
-                protocol = node.modelSchemaObj.protocol.protocol;
+        form.parse(req, (err, fields, files) => {
+            if (err) {
+                console.log(err);
+                res.status(500).end("上传失败");
+                return;
             }
-            console.log("set protocol value: " + protocol + ", topic: " + node.selectedModel);
-      
-            // 模型数据缓存不存在需要从服务端重新拉一份
-            if (!node.modelSchemaObj && node.selectedModel != 'Auto') {
-                queryModelSchema(node.selectedModel).then((res) => {
-                    if (res?.data?.data) {
-                        node.modelSchemaObj = res.data.data;
-                    } else {
-                        console.log(`topic ${node.selectedModel} query failed`);
-                    }
-                });
-            }
-
-            if (node.intervalId) {
-                clearInterval(node.intervalId);
-            }
-            node.intervalId = triggerDeleteLogFile("/data/log/topology.log");
-
-            node.on('input', function (msg) {
-                var modelTopic = msg.model || (node.selectedModel == 'Auto' ? '' : node.selectedModel);
-                
-                var transferred = protocolDataTransfer(node.modelSchemaObj, msg, modelTopic);
-                if (transferred.code == 200) {
-
-                    if (transferred.isMultiple === true) {
-                        node.send([transferred.data, null]);
-                    } else {
-                        msg.topic = rebuildSendTopic(modelTopic);
-                        msg.payload = transferred.data;
-                        node.send([msg, null]);
-                    }
-                    
-                } else {
-
-                    if (transferred.code >= 200 && transferred.code < 300) {
-                        node.debug(transferred.message);
-                    } else if (transferred.code >= 300 && transferred.code < 400) { // 错误写到日志文件，拓扑图分析
-                        let topics = [];
-                        if (node.selectedModel && node.selectedModel != 'Auto') {
-                            topics.push(node.selectedModel);
-                        } else if (node.modelMapping) {
-                            topics = [...new Set(Object.values(node.modelMapping))];
-                        }
-                        if (topics.length > 0) {
-                            try {
-                                var filePath = "/data/log/topology.log";
-                                if (transferred.code == 301) {
-                                    writeToFile(topics, '', filePath); // 恢复
-                                } else {
-                                    writeToFile(topics, transferred.message, filePath);
-                                }
-                            } catch (e) {
-                                console.error('write error log fail:', e.message);
-                            }
-                        }
-                    } else {
-                        node.error(transferred.message, msg);
-                    }
-                }
-            });
+            res.setHeader('Content-Type', 'application/json');
+            // 获取上传的 Excel 文件路径
+            const excelFile = files.file[0].filepath;
             
-        }
-
-        function triggerDeleteLogFile(filePath) {
-            var intervalId = setInterval(function() {
-                fs.stat(filePath, (err, stats) => {
-                    if (err) {
-                        return;
-                    }
-                
-                    // 获取文件的创建时间（或修改时间）
-                    const fileCreationTime = stats.birthtime || stats.mtime; // birthtime 是创建时间，mtime 是修改时间
-                    
-                    const currentTime = new Date().getTime();
-
-                    // 计算时间差（单位：毫秒）
-                    const timeDifference = currentTime - fileCreationTime;
-                    const oneHourInMilliseconds = 60 * 60 * 1000; // 1 小时的毫秒数
-                
-                    // 判断是否超过 1 小时
-                    if (timeDifference > oneHourInMilliseconds) {
-                        // 删除文件
-                        fs.unlink(filePath, (err) => {
-                            if (err) {
-                                console.error('删除文件失败:', err);
-                            } else {
-                                console.log('文件已删除:', filePath);
-                            }
-                        });
-                    } 
-                });
-            }, 60 * 60 * 1000); // 1小时删除一次文件
-            return intervalId;
-        }
-
-        function writeToFile(topics, errorMsg, filePath) {
-            let errorJsons = "";
-            for (let i in topics) {
-                var tts = topics[i];
-                if (Array.isArray(tts)) {
-                    for (let j = 0; j < tts.length; j++) {
-                        var topic = tts[j].split(":")[0];
-                        var current = new Date().getTime();
-                        if (errorMsg) {
-                            let errJson = `{"instanceTopic":"${topic}","topologyNode":"pushOriginalData","eventCode":"1","eventMessage":"${errorMsg}","eventTime":${current}},\n`
-                            errorJsons += errJson;
-                        } else {
-                            let errJson = `{"instanceTopic":"${topic}","topologyNode":"pushOriginalData","eventCode":"0","eventMessage":"","eventTime":${current}},\n`
-                            errorJsons += errJson;
-                        }
+            if (fs.existsSync(excelFile)) {
+                // 调用 node-xlsx 解析
+                let excelData = parseExcel(excelFile);
+                // 解析完毕之后删除文件
+                fs.unlinkSync(excelFile);
+                if (excelData) {
+                    if (excelData.length == 0) {
+                        res.status(400).end('Excel data is empty!');
+                    } else {
+                        res.status(200).end(JSON.stringify({data: excelData}));
                     }
                 } else {
-                    var topic = tts.split(":")[0];
-                    var current = new Date().getTime();
-                    if (errorMsg) {
-                        let errJson = `{"instanceTopic":"${topic}","topologyNode":"pushOriginalData","eventCode":"1","eventMessage":"${errorMsg}","eventTime":${current}},\n`
-                        errorJsons += errJson;
-                    } else {
-                        let errJson = `{"instanceTopic":"${topic}","topologyNode":"pushOriginalData","eventCode":"0","eventMessage":"","eventTime":${current}},\n`
-                        errorJsons += errJson;
-                    }
-                }
-            }
-            fs.appendFile(filePath, errorJsons, (error) => {
-                if (error) {
-                    console.log(error);
-                }
-            });
-        }
-
-        function queryModelSchema(topic) {
-            var encodeUrl = encodeURI('http://backend:8080/inter-api/supos/uns/instance?topic=' + topic);
-            return axios.get(encodeUrl).then(res => {
-                return res;
-            }).catch(e => console.log(e.message));
-        }
-
-        function protocolDataTransfer(modelDef, msg, modelTopic) {
-            var protocol = modelDef?.protocol?.protocol || "relation";
-            switch(protocol) {
-                case "modbus": 
-                    return arrayDataTransfer(modelTopic, msg.payload, node.modelMapping);
-                case "opcda": 
-                    return opcdaDataTransfer(msg.payload, node.modelMapping);
-                case "opcua": {
-                    if (msg.topic == 'subscriptionId') {
-                        return {
-                            "code": 205,
-                            "message": 'subscription event triggered'
-                        }
-                    } 
-                    if (msg.status) {
-                        let liveStatus = ['keepalive', 'connected', 'subscribed'];
-                        node.debug("receive opcua server status is " + msg.status);
-                        if (msg.status.indexOf('active') !== -1 || msg.status.indexOf('connected') !== -1 || liveStatus.includes(msg.status)) {
-                            return {
-                                "code": 301,
-                                "message": 'opcua server is connected.'
-                            }
-                        } else if (msg.status == 'create client' || msg.status == 'connecting' ) {
-                            return {
-                                "code": 205,
-                                "message": 'opcua client is connecting...'
-                            }
-                        } else {
-                            return {
-                                "code": 302,
-                                "message": 'opcua server connect failed, status: ' + msg.status
-                            }
-                        }
-                    }
-                    if (msg.payload != null && msg.payload != undefined) {
-                        return opcuaDataTransfer(node.modelMapping, msg);
-                    } else {
-                        return {
-                            "code": 400,
-                            "message": `opcua message payload(${msg.payload}) is empty.`
-                        }
-                    }
-                }
-                case "rest": 
-                    if (msg.payload != null && msg.payload != undefined) {
-                        return restDataTransfer(msg.payload, modelDef);
-                    } else {
-                        return {
-                            "code": 400,
-                            "message": `rest message payload(${msg.payload}) is empty.`
-                        }
-                }
-                case "icmp": 
-                    return icmpDataTransfer(msg.payload);
-                case "relation": case "mqtt": 
-                    return mqttDataTransfer(msg.payload);
-                default: {
-                    // 目前支持3种数据类型转换，分别是数组、基本数据类型、json对象，前面2种可以分别按照modbus和opcua处理
-                    var inputPayload = msg.payload;
-                    if (Array.isArray(inputPayload)) {
-                        return arrayDataTransfer(modelTopic, inputPayload, node.modelMapping);
-                    } else if (typeof inputPayload === 'object') {
-                        return jsonDataTransfer(node.modelMapping, inputPayload);
-                    } else if (isPrimitive(inputPayload)) {
-                        return arrayDataTransfer(modelTopic, [inputPayload], node.modelMapping);
-                    } else {
-                        return {
-                            "code": 400,
-                            "message": `自定义协议目前只支持数组、JSON数据类型.`
-                        }
-                    }
-                }
-            }
-        };
-
-        // 判断是否为基础数据类型
-        function isPrimitive(value) {
-            return (
-              typeof value === 'string' ||
-              typeof value === 'number' ||
-              typeof value === 'boolean' ||
-              typeof value === 'symbol' ||
-              value === null
-            );
-        }
-
-        function mqttDataTransfer(inputData) {
-            return {
-                "code": 200,
-                "isMultiple": false,
-                "data":  inputData
-            }
-        }
-
-        function icmpDataTransfer(inputStatus) {
-            let fixTime = new Date().getTime();
-            var data = {
-                "_ct": fixTime,
-                "_qos": 0,
-                "status": inputStatus === true ? 1 : 0
-
-            }
-            return {
-                "code": 200,
-                "isMultiple": false,
-                "data": data
-            }
-        }
-
-        // 康熙说只传原始数据，不要包装
-        function restDataTransfer(inputData, modelDef) {
-            // 最外层数据路径， 例如： 输入{"data": {"list": []}}, 那么dataPath=data.list
-            var dataPath = modelDef['dataPath'];
-            var data = inputData;
-            if (typeof inputData === 'string') {
-                try {
-                    data = JSON.parse(inputData);
-                } catch(err) {
-                    return {
-                        "code": 400,
-                        "message": inputData
-                    }
-                }
-            }
-            if (dataPath) {
-                var indexs = dataPath.split('.');
-                for (let i in indexs) {
-                    data = data[indexs[i]];
-                }
-            }
-            if (!data) {
-                return {
-                    "code": 400,
-                    "message": `invalid data ${inputData}`
-                }
-            }
-            // 数据参数映射
-            var newData = [];
-            var mappingCache = {};
-            if (Array.isArray(data)) {
-                // 对数组内每个对象的属性根据模型映射关系进行匹配
-                for (let obj of data) {
-                    var newObj = getMappingField(obj, mappingCache, modelDef);
-                    newData.push(newObj);
+                    res.status(500).end("Excel parse failed, please check format!");
                 }
             } else {
-                var newObj = getMappingField(data, mappingCache, modelDef);
-                newData.push(newObj);
+                RED.log.error('Please confirm whether the "/data/uploads" directory exists in container.');
+                res.status(500).end("Excel upload failed!");
             }
-            if (newData.length == 0) {
-                node.context().flow.set("pageStart", 0);
-            }
-            // 更新页码, 以备下一次请求使用
-            if (restQueryPageStartKey) {
-                updateUrl(newData.length);
-            }
-            return {
-                "code": 200,
-                "isMultiple": false,
-                "data": newData
+        });
+        
+    });
 
-            }
-            // return {
-            //     "code": 200,
-            //     "isMultiple": false,
-            //     "data": inputData 
-            // }
-        }
+    httpNode.post('/nodered-api/save/tags', (req, res) => {
+        
+        saveGlobalStorage(req.body.nodeId, req.body.tags);
 
-        function isEmptyObject(obj) {
-            return Object.keys(obj).length === 0;
+        res.status(200).end("success");
+    });
+
+    httpNode.get('/nodered-api/query/tags', (req, res) => {
+
+        let pageNo = req.query.pageNo || 1; // 起始页
+        let nodeId = req.query.nodeId; // 查询条件
+
+        const excelData = loadStorage(nodeId);
+
+        res.status(200).end(JSON.stringify({data: excelData}));
+    });
+
+    function saveGlobalStorage(key, data) {
+        try {
+            let buffer = fs.readFileSync(storagePath);
+            if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+                buffer = buffer.subarray(3);
+            }
+            let content = buffer.toString('utf-8');
+            if (!content) {
+                content = "{}";
+            }
+            let o = JSON.parse(content);
+            o[key] = data;
+            fs.writeFileSync(storagePath, JSON.stringify(o));
+            
+        } catch (err) {
+            console.log(err)
+            RED.log.error(`数据保存失败`);
         }
         
-        function getMappingField(inputObj, mapping, modelDef) {
-            var modelFields = modelDef['fields'];
-            var newObj = {};
-            var isEmpty = isEmptyObject(mapping);
-            for (let [key, value] of Object.entries(inputObj)) {
-                if (isEmpty) {
-                    for (var field of modelFields) {
-                        if (field['index'] == key) {
-                            newObj[field['name']] = value;
-                            mapping[key] = field['name'];
-                            break;
-                        }
-                    }
-                } else {
-                    var fieldName = mapping[key];
-                    if (fieldName) {
-                        newObj[fieldName] = value;
-                    }
-                }
+    }
+
+    function loadStorage(key) {
+        try {
+            let buffer = fs.readFileSync(storagePath);
+            if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+                buffer = buffer.subarray(3);
             }
-            return newObj;
+            let content = buffer.toString('utf-8');
+            if (!content) {
+                content = "{}";
+            }
+            let o = JSON.parse(content);
+            return o[key] || [];
+        } catch (err) {
+            console.log(err);
+            return [];
         }
+    }
 
-        function jsonDataTransfer(mappings, inputPayload) {
-            var multipleVqt = [];
-            var timestamp = Date.now();
-            let resultMap = {};  // {topic1: [{field1: value1}, {field2: value2}]}
-
-            // {位号1: value1, 位号2: value2} ==> {topic1: [{field1: value1}, {field2: value2}]}
-            for (let key in inputPayload) {
-
-                var ref = mappings[key]; // mappings结构为 {位号: [unsTopic:fieldName]}
-
-                if (!Array.isArray(ref)) {
-                    ref = [ref]; // [unsTopic:fieldName]
-                } 
-
-                for (let i in ref) {
-                    let splitArr = ref[i].split(":");
-                    let fieldName = splitArr[1] || "v";
-                    let modelTopic = splitArr[0];
-
-                    var fieldValues = resultMap[modelTopic];
-                    if (!fieldValues) {
-                        fieldValues = [];
-                    }
-                    var single = {};
-                    single[fieldName] = inputPayload[key];
-                    fieldValues.push(single);
-
-                    resultMap[modelTopic] = fieldValues
-                }
-                
-            }
-
-            for (let tp in resultMap) {
-                var valueArray = resultMap[tp]; // [{field1: value1}, {field2: value2}]
-                let vqt = {
-                    "_qos": 0,
-                    "_ct": timestamp,
-                }
-                for (let v in valueArray) {
-                    for (let f in valueArray[v]) { // valueArray[v] => {field1: value1}
-                        vqt[f] = valueArray[v][f];
-                    }
-                }
-
-                multipleVqt.push({
-                    "topic": rebuildSendTopic(tp),
-                    "payload": vqt
-                });
-            }
-            return {
-                "code": 200,
-                "isMultiple": true,
-                "data": multipleVqt
-            };
+    function buildMappings(excelData) {
+        let mappings = {};
+        if (!excelData) {
+            return mappings;
         }
-
-        // data is array of number
-        function arrayDataTransfer(modelTopic, data, mappings) {
-            if (!Array.isArray(data))  {
-                var errMsg = RED._("supmodel.protocol_data_not_match");
-                return {
-                    "code": 400,
-                    "message": errMsg
-                };
-            }
-            var unsData;
-            var timestamp = Date.now();
-
-            if (mappings) {
-                unsData = {
-                    "_qos": 0,
-                    "_ct": timestamp
-                };
-                let indexMap = mappings[modelTopic];
-                if (indexMap) {
-                    for (let k in indexMap) { // key是属性名，value是数组下标
-                        var realVal = data[indexMap[k]];
-                        if (realVal != null && realVal != undefined) {
-                            unsData[k] = realVal;
-                        }
-                    }
-                }
+        
+        excelData.map(row => {
+            // folder, name, alias, propName, propType, tag
+            const [folder, name, alias, propName, propType, tag] = row;
+            let props = mappings[tag] || [];
+            let path = "";
+            if (!folder) {
+                path = name;
+            } else if (folder.endsWith("/")) {
+                path = folder.concat(name);
             } else {
-                node.error(`${modelTopic} mapping cache is null`);
-                return {
-                    "code": 400,
-                    "message": `${modelTopic} mapping cache is null`
-                };
+                path = folder.concat("/").concat(name);
             }
-            return {
-                "code": 200,
-                "isMultiple": false,
-                "data": unsData
 
-            };
-        };
+            props.push({
+                path: path,
+                alias: alias,
+                propName: propName
+            });
+            mappings[tag] = props;
+        });
+        return mappings;
+    }
+    
 
-        function opcdaDataTransfer(inputArrayData, mappings) {
-            let multipleVqt = [];
-            let vqtMap = {};
+    function parseExcel(filePath) {
+        try {
+            // 读取并解析 Excel 文件
+            const workbook = xlsx.parse(filePath);
+            const sheetData = workbook[0].data; // 默认取第一个工作表
+        
+            // 转换为 JSON（首行为标题）
+            const [headers, ...rows] = sheetData;
+            return rows;
+      
+        } catch (error) {
+            console.log("解析excel异常", error);
+            return null;
+        }
+    }
 
-            for (let i in inputArrayData) {
-                let nodeId = inputArrayData[i].itemID; // opcda的位号
-                let fields = mappings[nodeId];
-                if (fields) {
-                    for (let j in fields) {
-                        var vqt = {
-                            "_qos": inputArrayData[i].errorCode,
-                            "_ct": new Date(inputArrayData[i].timestamp).getTime()
-                        }
-                        let field = fields[j]; // topic:fieldName
-                        let sp = field.split(':');
-                        var fieldName = sp[1];
-                        vqt[fieldName] = inputArrayData[i].value;
-                        var topic = sp[0];
-                        if (!vqtMap[topic]) {
-                            vqtMap[topic] = [];
-                        }
-                        vqtMap[topic].push(vqt);
-                        
-                    }
+    function SelectModel(config) {
 
-                } else {
-                    console.log(`opcda ${nodeId} 映射uns字段不存在`);
-                }
+        RED.nodes.createNode(this, config);
+        const node = this;
+
+        node.protocol = config.protocol;
+        node.models = config.models;
+        // if (node.models) {
+        //     node.context().global.set(node.id, node.models);
+        // }
+        node.mappings = buildMappings(node.models);
+
+        node.bridge = null;
+        node.interval = config.interval || 100; // 推送频率 默认100ms
+
+        switch (node.protocol) {
+            case "opcua": node.bridge = opcua.newOpcuaBridge(node, node.mappings, 5); break;
+            case "opcda": node.bridge = opcda.newOpcdaBridge(node, node.mappings, 5); break;
+            case "modbus": node.bridge = modbus.newModbusBridge(node, node.mappings, 5); break;
+            case "custom": node.bridge = custom.newCustomProtocolBridge(node, node.mappings, 5); break;
+            case "mock": {
+                const alias = Object.keys(node.mappings)[0];
+                node.bridge = mock.newMockDataBridge(node, alias); break;
             }
-            // 根据topic进行合并
-            for (let k in vqtMap) {
-                multipleVqt.push({
-                    "topic": rebuildSendTopic(k),
-                    "payload": vqtMap[k]
-
-                });
+            default: {
+                node.error('节点未生效：请选择协议');
+                return;
             }
-            
-            return {
-                "code": 200,
-                "isMultiple": true,
-                "data": multipleVqt
-            };
         }
 
-        function rebuildSendTopic(originTopic) {
-            return originTopic;
-        }
-
-        function opcuaDataTransfer(mappings, msg) {
-            var vqtWrapper = {};
-            // 判断是单个订阅还是批量订阅
-            let batch = (msg.payload?.value?.value != null && msg.payload?.value?.value != undefined) ? true : false;
-            // 寻找opcua位号对应uns的topic, msg.topic为opcua位号地址
-            let fts = [];
-            if (mappings && mappings[msg.topic]) {
-                let ts = mappings[msg.topic]; // 0=uns topic, 1=fieldName
-                if (!Array.isArray(ts)) {
-                    let tsArr = [];
-                    tsArr.push(ts); // 兼容老数据
-                    ts = tsArr;
-                }
-                for (let i in ts) {
-                    let sp = ts[i].split(':');
-                    fts.push({
-                        "modelTopic": sp[0],
-                        "fieldName": sp[1]
-                    });
-                }
+        this.on("close", function (done) {
+            if (node.bridge) {
+                node.bridge.destroy(node.id);
+                node.bridge = null;
             }
-            
-            let multipleVqt = [];
-            if (batch) {
-                if (fts.length > 0) {
-                    for (let j in fts) {
-                        var vqt = {
-                            "_qos": msg.payload.statusCode ? msg.payload.statusCode._value : -1,
-                            "_ct": new Date(msg.payload.sourceTimestamp).getTime()
-                        }
+            done(); // 必须调用以完成清理
+        });
 
-                        var fname = fts[j].fieldName;
-                        vqt[fname] = msg.payload.value.value;
-
-                        multipleVqt.push({
-                            "topic": rebuildSendTopic(fts[j].modelTopic),
-                            "payload": vqt
-
-                        });
-                    }
-                } else {
-                    return {
-                        "code": 400,
-                        "message": `fields mapping cache is null`
-                    };
-                }
-                
-            } else {
-                if (fts.length > 0) {
-                    for (let j in fts) {
-                        var vqt = {
-                            "_qos": msg.statusCode ? msg.statusCode._value : -1,
-                            "_ct": new Date(msg.sourceTimestamp).getTime()
-                        }
-                        var fname = fts[j].fieldName;
-                        vqt[fname] = msg.payload;
-
-                        multipleVqt.push({
-                            "topic": rebuildSendTopic(fts[j].modelTopic),
-                            "payload": vqt
-                        });
-                    }
-                } else {
-                    return {
-                        "code": 400,
-                        "message": `fields mapping cache is null`
-                    };
-                }
+        node.on('input', function (msg) {
+            var errorMsg = node.bridge.receive(msg);
+            if (errorMsg) {
+                var errMsg = RED._(errorMsg);
+                node.error(errMsg, msg);
             }
-            
-            return {
-                "code": 200,
-                "isMultiple": true,
-                "data": multipleVqt
-            };
-    
-        };
+        });
 
-        function singleDataTransfer(mappings, msg) {
-            var fieldName = "v";
-            msg.model = msg.topic;
 
-            if (mappings && mappings[msg.topic]) {
-                let ts = mappings[msg.topic].split(':'); // 0=uns topic, 1=fieldName
-                msg.model = ts[0];
-                fieldName = ts[1] || "v";
-            }
-            let vqt = {
-                "_qos": 0,
-                "_ct": new Date().getTime()
-            }
-            vqt[fieldName] = msg.payload;
-
-            return {
-                "code": 200,
-                "isMultiple": false,
-                "data": vqt
-
-            };
-    
-        };
     }
     RED.nodes.registerType("supmodel", SelectModel);
     

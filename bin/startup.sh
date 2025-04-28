@@ -165,7 +165,7 @@ fi
 
 if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
    bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
-   bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
+   #bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
    bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1 && \
    bash $SCRIPT_DIR/init/portainer-init.sh; then
 
