@@ -756,8 +756,10 @@
             }
             node.tableValid = true;
             if (node.changed === true) {
-                // build uns nodes
-                postBuildUnsNode(node, node.models);
+                if (node.models && node.models.length > 0) {
+                    // build uns nodes
+                    postBuildUnsNode(node, node.models);
+                }
                 createDynamicMqttBroker(RED);
             }
 
