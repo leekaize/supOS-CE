@@ -8,7 +8,7 @@ source $SCRIPT_DIR/../global/log.sh
 source $SCRIPT_DIR/../../.env
 
 echo ">> start to init portainer OAuth ..."
-PORTAINER_JWT=`docker exec -it nodered curl -skX POST https://portainer:9443/api/auth      -H "Content-Type: application/json"      -d '{"username": "admin", "password": "adminpassword"}' | awk -F'"' '/jwt/ {print $4}'` && echo "Successfully got Portainer JWT"\
+PORTAINER_JWT=`docker exec nodered curl -skX POST https://portainer:9443/api/auth      -H "Content-Type: application/json"      -d '{"username": "admin", "password": "adminpassword"}' | awk -F'"' '/jwt/ {print $4}'` && echo "Successfully got Portainer JWT"\
 || if [ "$1" == "--verbose" ]; then warn "Failed to obtain JWT from Portainer"; fi
 
 docker exec nodered curl -skX POST "https://portainer:9443/api/users"   -H "Authorization: Bearer $PORTAINER_JWT"   -H "Content-Type: application/json"   -d '{    "Username": "supos",    "Password": "Supos@13041304",    "Email": "supos@supos.com","Role": 1 }' > /dev/null 2>&1 && echo "Successfully created administrator 'supos'"\
@@ -35,6 +35,6 @@ docker exec nodered curl -skX PUT "https://portainer:9443/api/settings" \
      \"userSessionTimeout\": \"1h\"
    }" > /dev/null 2>&1 \
 && echo "Successfully set Portainer OAuth"\
-|| if [ "$1" == "--verbose" ]; then warn "Failed to create admin user"; fi
+|| if [ "$1" == "--verbose" ]; then warn "Failed to set Portainer OAuth"; fi
 
 echo "<< Finished setting Portainer OAuth"
