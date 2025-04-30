@@ -2013,7 +2013,7 @@ plugins:
   - https
   updated_at: 1745574422
   config:
-    login_url: /supos-login
+    login_url: ${BASE_URL}/keycloak/home/auth/realms/supos/protocol/openid-connect/auth?client_id=supos&redirect_uri=${BASE_URL}/inter-api/supos/auth/token&response_type=code&scope=openid
     whitelist_paths:
     - ^/inter-api/supos/auth.*$
     - ^/inter-api/supos/systemConfig.*$
