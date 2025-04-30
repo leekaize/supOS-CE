@@ -1,4 +1,5 @@
 # supOS: An Open-Source IIoT Platform
+[![Docs](https://img.shields.io/badge/docs-available-brightgreen?style=flat&logo=readthedocs)](https://suposcommunity.vercel.app)
 
 **supOS** is an open-source industrial data integration platform built on the **Unified Namespace (UNS)** methodology and powered by production-grade open-source technologies.
 
@@ -189,6 +190,10 @@ After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to gener
 ### 3.Access the Platform
    - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
    - Default superadmin and password : supos/Supos@1304
+
+## 📚 **Documentation Website**  
+For full usage guides, examples, and developer documentation, visit:  
+👉 [supOS Community Docs](https://suposcommunity.vercel.app)
 
 ## License
    - This project is distributed under Apache 2.0. See LICENSE for details.
