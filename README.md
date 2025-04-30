@@ -191,6 +191,10 @@ After providing a valid `OpenAIAPIKey` in `.env`, you can use **GenUI** to gener
    - Visit `http://<YOUR-DOMAIN>:<YOUR-PORT>` in your browser (based on ENTRANCE_DOMAIN and ENTRANCE_PORT in `.env`).
    - Default superadmin and password : supos/Supos@1304
 
+📚 **Documentation Website**  
+For full usage guides, examples, and developer documentation, visit:  
+👉 [supOS Community Docs](https://suposcommunity.vercel.app)
+
 ## License
    - This project is distributed under Apache 2.0. See LICENSE for details.
 
