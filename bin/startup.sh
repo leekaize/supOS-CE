@@ -20,7 +20,7 @@ if [[ "$platform" == MINGW64* ]]; then
 
     current_volumes_path=$(grep '^VOLUMES_PATH=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
     default_volumes_path="$HOME/volumes/supos/data"
-    read -p "Choose VOLUMES_PATH: (Press Enter to use: [$default_volumes_path])" volumes_path
+    read -p "Choose VOLUMES_PATH: (Press Enter for default: [$default_volumes_path])" volumes_path
     volumes_path=${volumes_path:-$default_volumes_path}
 
     if [ "$volumes_path" != "$current_volumes_path" ]; then
