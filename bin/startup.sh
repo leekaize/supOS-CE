@@ -20,7 +20,7 @@ if [[ "$platform" == MINGW64* ]]; then
 
     current_volumes_path=$(grep '^VOLUMES_PATH=' "$SCRIPT_DIR/../.env" | cut -d '=' -f2-)
     default_volumes_path="$HOME/volumes/supos/data"
-    read -p "Choose VOLUMES_PATH: (Enter to use: [$default_volumes_path])" volumes_path
+    read -p "Choose VOLUMES_PATH: (Press Enter to use: [$default_volumes_path])" volumes_path
     volumes_path=${volumes_path:-$default_volumes_path}
 
     if [ "$volumes_path" != "$current_volumes_path" ]; then
@@ -37,7 +37,7 @@ if [[ "$platform" == MINGW64* ]]; then
 if [[ -n "$current_entrance_domain" ]]; then
     # 有默认值，允许回车使用
     while true; do
-        read -p "Choose IP address for ENTRANCE_DOMAIN (Enter for default: [$current_entrance_domain]): " selected_ip
+        read -p "Choose IP address for ENTRANCE_DOMAIN (Press Enter for default: [$current_entrance_domain]): " selected_ip
         selected_ip=$(echo "$selected_ip" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         selected_ip=${selected_ip:-$current_entrance_domain}
 
