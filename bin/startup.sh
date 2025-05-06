@@ -180,7 +180,7 @@ if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.
     fi
 
     echo -e "      $PLATFORM_URL\n"
-    echo -e "    Default superadmin and password : supos/Supos@1304 \n"
+    echo -e "    Default superadmin and password : supos/supos \n"
     echo -e "============================================================"
 
 else
