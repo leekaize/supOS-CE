@@ -16,8 +16,8 @@ chooseProfile1() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand+="--profile grafana --profile tdengine "
-        activeServices+=",grafana,tdengine"
+        profileCommand+="--profile grafana --profile timescale "
+        activeServices+=",grafana,timescale"
     else
         read -p "Step 1: Do you want to install Fuxa?[y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
@@ -47,18 +47,18 @@ chooseProfile1() {
         fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 5: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB " choicedb
+            read -p "Step 5: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
         else
-            read -p "Step 5: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB " choicedb
+            read -p "Step 5: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile tdengine "
-            activeServices+=",tdengine"
-            # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
-        else
             profileCommand+="--profile timescale "
             activeServices+=",timescale"
+            # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
+        else
+            profileCommand+="--profile tdengine "
+            activeServices+=",tdengine"
             # echo "PG_IMAGE=timescale/timescaledb:2.18.2-pg17" >> $ENV_TMP
         fi
 
@@ -80,8 +80,8 @@ chooseProfile2() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile grafana --profile tdengine "
-        activeServices+=",grafana,tdengine"
+        profileCommand="--profile grafana --profile timescale "
+        activeServices+=",grafana,timescale"
     else 
         read -p "Step 1: Do you want to install fuxa? [y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
@@ -122,18 +122,18 @@ chooseProfile2() {
         fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 7: 请选择一种时序数据库: [1] TDEngine(默认)  [2] TimescaleDB " choicedb
+            read -p "Step 7: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
         else 
-            read -p "Step 7: Please select a time-series database: [1] TDEngine(default)  [2] TimescaleDB " choicedb
+            read -p "Step 7: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile tdengine "
-            activeServices+=",tdengine"
-            # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
-        else 
             profileCommand+="--profile timescale "
             activeServices+=",timescale"
+            # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
+        else 
+            profileCommand+="--profile tdengine "
+            activeServices+=",tdengine"
             # echo "PG_IMAGE=timescale/timescaledb:2.18.2-pg17" >> $ENV_TMP
         fi
 
