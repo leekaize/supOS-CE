@@ -19,7 +19,7 @@ find $SCRIPT_DIR/../../mount/grafana/data/plugins/ -type f -name "*.tar" -exec t
 # 更新volumes目录
 cp -r $SCRIPT_DIR/../../mount/grafana/data/plugins/* $VOLUMES_PATH/grafana/data/plugins/
 cp -r $SCRIPT_DIR/../../mount/keycloak/theme/* $VOLUMES_PATH/keycloak/theme/
-cp -r $SCRIPT_DIR/../../mount/kong/* $VOLUMES_PATH/kong/
+# cp -r $SCRIPT_DIR/../../mount/kong/* $VOLUMES_PATH/kong/
 cp $SCRIPT_DIR/../../mount/emqx/config/* $VOLUMES_PATH/emqx/config/
 
 rm -rf $VOLUMES_PATH/node-red/.npm && cp -r $SCRIPT_DIR/../../mount/node-red/.npm  $VOLUMES_PATH/node-red/
