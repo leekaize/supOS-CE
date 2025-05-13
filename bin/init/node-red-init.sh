@@ -43,7 +43,7 @@ docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-c
 || error "node-red install OMRON fins failed!"
 
 docker exec $2 sh -c "npm install --unsafe-perm /data/offline_modules/modules/node-xlsx-0.24.0.tgz"  >/dev/null
-docker exec $2 sh -c "npm install --unsafe-perm /data/offline_modules/modules/formidable-3.5.3.tgz"  >/dev/null
+docker exec $2 sh -c "npm install --unsafe-perm /data/offline_modules/modules/formidable-3.5.4.tgz"  >/dev/null
 
 docker exec $2 sh -c "cd /data && npm install $3 --no-audit --offline node-red-contrib-ui-ping@1.0.0" \
 || error "node-red install ui-ping failed!"

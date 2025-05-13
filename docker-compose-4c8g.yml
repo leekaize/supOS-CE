@@ -51,7 +51,7 @@ services:
       - ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION}
       - ELASTICSEARCH_TIMEHORIZON=${ELASTICSEARCH_TIMEHORIZON}
     ports:
-      - "8080:8080"
+      - "8091:8080"
       - "7000:8000"
     deploy:
       resources:
@@ -353,7 +353,7 @@ services:
       - ${VOLUMES_PATH}/kong/kong-plugin-auth-checker:/usr/local/share/lua/5.1/kong/plugins/supos-auth-checker
       - ${VOLUMES_PATH}/kong/kong-plugin-url-transformer:/usr/local/share/lua/5.1/kong/plugins/supos-url-transformer
     ports:
-      - "8088:8000"
+      - "${ENTRANCE_PORT}:8000"
       - "8443:8443"
       - "8001:8001"
       - "8444:8444"
