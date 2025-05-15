@@ -420,7 +420,7 @@ services:
       - ${VOLUMES_PATH}/kong/kong-plugin-auth-checker:/usr/local/share/lua/5.1/kong/plugins/supos-auth-checker
       - ${VOLUMES_PATH}/kong/kong-plugin-url-transformer:/usr/local/share/lua/5.1/kong/plugins/supos-url-transformer
     ports:
-      - "${ENTRANCE_PORT}:8000"
+      - "8088:8000"
       - "8443:8443"
       - "8001:8001"
       - "8444:8444"
