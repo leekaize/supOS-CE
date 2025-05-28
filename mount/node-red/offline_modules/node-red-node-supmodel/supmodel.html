@@ -755,13 +755,11 @@
                 return false; // 阻止编辑框关闭
             }
             node.tableValid = true;
-            if (node.changed === true) {
-                if (node.models && node.models.length > 0) {
-                    // build uns nodes
-                    postBuildUnsNode(node, node.models);
-                }
-                createDynamicMqttBroker(RED);
+            if (node.models && node.models.length > 0) {
+                // build uns nodes
+                postBuildUnsNode(node, node.models);
             }
+            createDynamicMqttBroker(RED);
 
         }
         
