@@ -3066,6 +3066,7 @@ INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f
 INSERT INTO "public"."resource_uris" VALUES ('8852fd44-b67e-4d11-9ab6-f05b9bf32f7c', '/ContainerManagement');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/McpClient');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/nodered');
+INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/dashboard');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/GenerativeUI');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/AboutUs');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/GenApps');
