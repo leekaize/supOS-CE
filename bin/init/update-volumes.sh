@@ -14,7 +14,7 @@ tar -zxvf $SCRIPT_DIR/../../mount/node-red/npmCache.tar.gz -C $SCRIPT_DIR/../../
 tar -zxvf $SCRIPT_DIR/../../mount/eventflow/npmCache.tar.gz -C $SCRIPT_DIR/../../mount/eventflow/ > /dev/null 2>&1
 
 echo "Info: loading npm cache complete."
-find $SCRIPT_DIR/../../mount/grafana/data/plugins/ -type f -name "*.tar" -exec tar -xvf {} -C $SCRIPT_DIR/../../mount/grafana/data/plugins/ \;
+find $SCRIPT_DIR/../../mount/grafana/data/plugins/ -type f -name "*.tar.gz" -exec tar -xzvf {} -C $SCRIPT_DIR/../../mount/grafana/data/plugins/ \;
 
 # 更新volumes目录
 cp -r $SCRIPT_DIR/../../mount/grafana/data/plugins/* $VOLUMES_PATH/grafana/data/plugins/
