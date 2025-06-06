@@ -2064,7 +2064,7 @@ plugins:
   tags: ~
   created_at: 1734330234
   name: key-auth
-  enabled: true
+  enabled: false
   instance_name: ~
   protocols:
   - grpc
