@@ -6,7 +6,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 # Remove symbols such as carriage returns to avoid ^m
 sed -i 's/\r$//' $SCRIPT_DIR/../.env
-# 设置.env环境变量
+
 source $SCRIPT_DIR/../.env
 source $SCRIPT_DIR/global/log.sh
 source $SCRIPT_DIR/global/choose-profile-command.sh
