@@ -16,8 +16,8 @@ chooseProfile1() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand+="--profile grafana --profile timescale "
-        activeServices+=",grafana,timescale"
+        profileCommand+="--profile grafana --profile tsdb "
+        activeServices+=",grafana,tsdb"
     else
         read -p "Step 1: Do you want to install Fuxa?[y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
@@ -53,8 +53,8 @@ chooseProfile1() {
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile timescale "
-            activeServices+=",timescale"
+            profileCommand+="--profile tsdb "
+            activeServices+=",tsdb"
             # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
         else
             profileCommand+="--profile tdengine "
@@ -80,24 +80,24 @@ chooseProfile2() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile grafana --profile timescale "
-        activeServices+=",grafana,timescale"
+        profileCommand="--profile grafana --profile tsdb "
+        activeServices+=",grafana,tsdb"
     else 
-        read -p "Step 1: Do you want to install fuxa? [y/n]: " choicefuxa
+        read -p "Step 1: Do you want to install Fuxa? [y/n]: " choicefuxa
         choicefuxa=${choicefuxa:-Y}
         if [[ $choicefuxa =~ ^[Yy] ]]; then
             profileCommand="--profile fuxa "
             activeServices+=",fuxa"
         fi
 
-        read -p "Step 2: Do you want to install grafana? [y/n]: " choicegrafana
+        read -p "Step 2: Do you want to install Grafana? [y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3: Do you want to install minio? [y/n]: " choiceminio
+        read -p "Step 3: Do you want to install MinIO? [y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
@@ -128,8 +128,8 @@ chooseProfile2() {
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile timescale "
-            activeServices+=",timescale"
+            profileCommand+="--profile tsdb "
+            activeServices+=",tsdb"
             # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
         else 
             profileCommand+="--profile tdengine "
