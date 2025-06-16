@@ -79,20 +79,44 @@ else
     for i in "${!ips[@]}"; do
       echo "$((i+1))). ${ips[$i]}"
     done
+    echo "$((${#ips[@]}+1))). Custom IP address (enter manually)"
 
     while true; do
-      read -p "Select option (0-${#ips[@]}), or press Enter to keep current: " choice
+      read -p "Select option (0-$((${#ips[@]}+1))), or press Enter to keep current: " choice
 
       if [[ -z "$choice" ]] || [[ "$choice" == "0" ]]; then
+          # Check if current domain is empty
+          if [[ -z "$current_entrance_domain" ]]; then
+            echo "Current ENTRANCE_DOMAIN is empty and cannot be kept. Please select a valid option."
+            continue
+          fi
           selected_ip="$current_entrance_domain"
           echo "Keeping current ENTRANCE_DOMAIN: $selected_ip"
           break
       elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#ips[@]}" ]; then
         selected_ip=${ips[$((choice-1))]}
+        # Check if selected IP is empty
+        if [[ -z "$selected_ip" ]]; then
+          echo "Selected IP is empty. Please choose another option."
+          continue
+        fi
         echo "Selected IP: $selected_ip"
         break
+      elif [[ "$choice" == "$((${#ips[@]}+1))" ]]; then
+        while true; do
+          read -p "Enter custom IP address or domain: " custom_ip
+          custom_ip=$(echo "$custom_ip" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [[ -z "$custom_ip" ]]; then
+            echo "Input cannot be empty. Please enter a valid IP address or domain."
+          else
+            selected_ip="$custom_ip"
+            echo "Selected custom IP: $selected_ip"
+            break
+          fi
+        done
+        break
       else
-        echo "Invalid input. Please enter a valid option number (0-${#ips[@]}) or press Enter."
+        echo "Invalid input. Please enter a valid option number (0-$((${#ips[@]}+1))) or press Enter."
       fi
     done
 
