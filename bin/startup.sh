@@ -4,11 +4,13 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+# Remove symbols such as carriage returns to avoid ^m
+sed -i 's/\r$//' $SCRIPT_DIR/../.env
+
+source $SCRIPT_DIR/../.env
 source $SCRIPT_DIR/global/log.sh
 source $SCRIPT_DIR/global/choose-profile-command.sh
 
-# Remove symbols such as carriage returns to avoid ^m
-sed -i 's/\r$//' $SCRIPT_DIR/../.env
 
 # Inspection System Version
 platform=$(uname -s)
@@ -145,10 +147,7 @@ Proceed without login? (y/N): " confirm_ip
 fi
 
 # Execute the installation docker script
-bash $SCRIPT_DIR/install-deb/install-docker.sh
-
-# Setting the .env environment variable
-source $SCRIPT_DIR/../.env
+source $SCRIPT_DIR/install-deb/install-docker.sh
 
 # Select which services need to be started
 if [ ! -f $VOLUMES_PATH/backend/system/active-services.txt ]; then 
@@ -161,37 +160,40 @@ else
   command=$(sed -n '2p' $VOLUMES_PATH/backend/system/active-services.txt)
 fi
 
-bash $SCRIPT_DIR/util/append-tempenv.sh "$command"
+source $SCRIPT_DIR/util/set-temp-env.sh "$command"
+
+# Replacement of file variables
+source $SCRIPT_DIR/init/init-keycloak-sql.sh
+source $SCRIPT_DIR/init/init-kong-property.sh
 
 DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-8c16g.yml
 if [ "$OS_RESOURCE_SPEC" == "1" ]; then
   DOCKER_COMPOSE_FILE=$SCRIPT_DIR/../docker-compose-4c8g.yml
 fi
 
-# Replacement of file variables
-bash $SCRIPT_DIR/init/generate-keycloak-sql.sh && bash $SCRIPT_DIR/init/generate-kong-property.sh
-
 # 创建volumes目录, 将mount目录迁移到volumes目录
 if [ -d "$VOLUMES_PATH" ] && [ "$(ls -A $VOLUMES_PATH)" ]; then
-  echo "Info: stop services ..."
-  docker compose --project-name supos $command -f $DOCKER_COMPOSE_FILE stop > /dev/null 2>&1
-  echo "Info: complete!"
-  bash $SCRIPT_DIR/init/update-volumes.sh $VOLUMES_PATH
+  info "stop services and apps..."
+  docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE stop > /dev/null 2>&1
+  # 停止所有app的容器
+  docker ps -a -q --filter "network=supos_default_network" | xargs --no-run-if-empty docker stop > /dev/null 2>&1
+  info "complete!"
+  source $SCRIPT_DIR/init/update-volumes.sh
 else
-  bash $SCRIPT_DIR/init/create-volumes.sh $VOLUMES_PATH
+  source $SCRIPT_DIR/init/init-volumes.sh
 fi
 
 # Load local images
 if [ -d "$SCRIPT_DIR/../images/" ] && [ "$(ls -A $SCRIPT_DIR/../images/)" ]; then
-  bash $SCRIPT_DIR/init/load-images.sh
+  source $SCRIPT_DIR/util/load-images.sh
 fi
 
 
 if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
-   bash $SCRIPT_DIR/init/node-red-init.sh 1880 nodered $1 && \
-   bash $SCRIPT_DIR/init/eventflow-init.sh 1889 eventflow $1 && \
-   bash $SCRIPT_DIR/init/minio-init.sh $1 > /dev/null 2>&1 && \
-   bash $SCRIPT_DIR/init/portainer-init.sh; then
+   source $SCRIPT_DIR/init/init-nodered.sh $1 && \
+   #bash $SCRIPT_DIR/init/node-red-init.sh 1889 eventflow $1 && \
+   source $SCRIPT_DIR/init/init-minio.sh $1 > /dev/null 2>&1 && \
+   source $SCRIPT_DIR/init/init-portainer.sh; then
 
     echo -e "\n============================================================"
     echo -e "🎉  All services are up and running!"
@@ -211,5 +213,3 @@ else
     echo -e "\n❌ ERROR: One or more steps failed during startup. Please check the logs above."
     exit 1
 fi
-
-rm -f $SCRIPT_DIR/../.env.tmp > /dev/null 2>&1

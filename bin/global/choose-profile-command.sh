@@ -16,30 +16,23 @@ chooseProfile1() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand+="--profile grafana --profile timescale "
-        activeServices+=",grafana,timescale"
+        profileCommand+="--profile grafana --profile tsdb "
+        activeServices+=",grafana,tsdb"
     else
-        read -p "Step 1: Do you want to install Fuxa?[y/n]: " choicefuxa
-        choicefuxa=${choicefuxa:-Y}
-        if [[ $choicefuxa =~ ^[Yy] ]]; then
-            profileCommand="--profile fuxa "
-            activeServices+=",fuxa"
-        fi
-
-        read -p "Step 2: Do you want to install Grafana?[y/n]: " choicegrafana
+        read -p "Step 1: Do you want to install Grafana?[y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3:Do you want to install MinIO?[y/n]: " choiceminio
+        read -p "Step 2:Do you want to install MinIO?[y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
-        read -p "Step 4: Do you want to install MCP-Client?[y/n]: " choicemcp
+        read -p "Step 3: Do you want to install MCP-Client?[y/n]: " choicemcp
         choicemcp=${choicemcp:-Y}
         if [[ $choicemcp =~ ^[Yy] ]]; then
             profileCommand+="--profile mcpclient "
@@ -47,14 +40,14 @@ chooseProfile1() {
         fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 5: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
+            read -p "Step 4: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
         else
-            read -p "Step 5: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
+            read -p "Step 4: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile timescale "
-            activeServices+=",timescale"
+            profileCommand+="--profile tsdb "
+            activeServices+=",tsdb"
             # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
         else
             profileCommand+="--profile tdengine "
@@ -80,41 +73,35 @@ chooseProfile2() {
     askyou=$(echo "$askyou" | xargs)  # trim leading/trailing spaces
     askyou=${askyou:-1}
     if [[ $askyou == 1 ]]; then
-        profileCommand="--profile grafana --profile timescale "
-        activeServices+=",grafana,timescale"
-    else 
-        read -p "Step 1: Do you want to install fuxa? [y/n]: " choicefuxa
-        choicefuxa=${choicefuxa:-Y}
-        if [[ $choicefuxa =~ ^[Yy] ]]; then
-            profileCommand="--profile fuxa "
-            activeServices+=",fuxa"
-        fi
+        profileCommand="--profile grafana --profile tsdb "
+        activeServices+=",grafana,tsdb"
+    else
 
-        read -p "Step 2: Do you want to install grafana? [y/n]: " choicegrafana
+        read -p "Step 1: Do you want to install Grafana? [y/n]: " choicegrafana
         choicegrafana=${choicegrafana:-Y}
         if [[ $choicegrafana =~ ^[Yy] ]]; then
             profileCommand+="--profile grafana "
             activeServices+=",grafana"
         fi
 
-        read -p "Step 3: Do you want to install minio? [y/n]: " choiceminio
+        read -p "Step 2: Do you want to install MinIO? [y/n]: " choiceminio
         choiceminio=${choiceminio:-Y}
         if [[ $choiceminio =~ ^[Yy] ]]; then
             profileCommand+="--profile minio "
             activeServices+=",minio"
         fi
-        read -p "Step 4: Do you want to install elasticsearch, kibana and filebeat? [y/n]: " choiceelk
+        read -p "Step 3: Do you want to install elasticsearch, kibana and filebeat? [y/n]: " choiceelk
         choiceelk=${choiceelk:-Y}
         if [[ $choiceelk =~ ^[Yy] ]]; then
             profileCommand+="--profile elk "
         fi
-        read -p "Step 5: Do you want to install MCP-Client?[y/n]: " choicemcp
+        read -p "Step 4: Do you want to install MCP-Client?[y/n]: " choicemcp
         choicemcp=${choicemcp:-Y}
         if [[ $choicemcp =~ ^[Yy] ]]; then
             profileCommand+="--profile mcpclient "
             activeServices+=",mcpclient"
         fi
-        read -p "Step 6: Do you want to install Gitea?[y/n]: " choiceGitea
+        read -p "Step 5: Do you want to install Gitea?[y/n]: " choiceGitea
         choiceGitea=${choiceGitea:-Y}
         if [[ $choiceGitea =~ ^[Yy] ]]; then
             profileCommand+="--profile gitea "
@@ -122,14 +109,14 @@ chooseProfile2() {
         fi
 
         if [[ "$LANGUAGE" == "zh-CN" ]]; then
-            read -p "Step 7: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
+            read -p "Step 6: 请选择一种时序数据库: [1] TimescaleDB(默认)  [2] TDEngine " choicedb
         else 
-            read -p "Step 7: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
+            read -p "Step 6: Please select a time-series database: [1] TimescaleDB(default)  [2] TDEngine " choicedb
         fi
         choicedb=${choicedb:-1}
         if [[ $choicedb == 1 ]]; then
-            profileCommand+="--profile timescale "
-            activeServices+=",timescale"
+            profileCommand+="--profile tsdb "
+            activeServices+=",tsdb"
             # echo "PG_IMAGE=postgres:17" >> $ENV_TMP
         else 
             profileCommand+="--profile tdengine "

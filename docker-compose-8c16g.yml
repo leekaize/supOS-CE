@@ -6,31 +6,34 @@ networks:
 
 services:
   frontend:
-    image: suposce/supos-ce-platform:1.0.6-T1
+    image: suposce/supos-ce-platform:1.0.8
     container_name: frontend
     ports:
       - "3010:3000"
       - "4000:4000"
       - "3001:3001"
+      - "3002:3002"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_MODEL=${OPENAI_API_MODEL}
       - REACT_APP_OS_LANG=${LANGUAGE}
-      - AGENT_DEPLOYMENT_URL=${AGENT_DEPLOYMENT_URL}
-      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+    volumes:
+      - plugin_front:/app/plugins-build
     networks:
       - default_network
+    restart: always
   backend:
-    image:  suposce/supos-ce-backend:1.0.6-T1
+    image:  suposce/supos-ce-backend:1.0.8-T1
     container_name: backend
     environment:
-      - MEM_OPTS=-Xms512m -Xmx3g -Dsink.thread=8
-      - JAVA_OPTS=-server -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/logs -Delk.enabled=${ENABLE_ELK} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+      - TZ=UTC
+      - MEM_OPTS=-Xms512m -Xmx3g -Dsink.thread=8 -Duser.timezone=UTC
+      - JAVA_OPTS=-server -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/logs -Delk.enabled=${ENABLE_ELK} -Dpg.jdbcUrl=jdbc:postgresql://tsdb:5432/postgres -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
       - ENV_DB_HOST=postgresql
       - ENV_DB_PORT=5432
       - NODE_RED_HOST=nodered
       - NODE_RED_PORT=1880
-      - SYS_OS_MULTIPLE_TOPIC=${MULTIPLE_TOPIC}
+      - SYS_OS_MULTIPLE_TOPIC=false
       - SYS_OS_VERSION=${OS_VERSION}
       - SYS_OS_LANG=${LANGUAGE}
       - SYS_OS_AUTH_ENABLE=${OS_AUTH_ENABLE}
@@ -41,6 +44,12 @@ services:
       - SYS_OS_APP_TITLE=${OS_NAME}
       - SYS_OS_PLATFORM_TYPE=${OS_PLATFORM_TYPE}
       - SYS_OS_ENTRANCE_URL=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}
+      - SYS_OS_USE_ALIAS_PATH_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
+      - SYS_OS_QUALITY_NAME=quality
+      - SYS_OS_TIMESTAMP_NAME=timeStamp
+      - SYS_OS_LAZY_TREE=false
+      - MQTT_PLUGIN=emqx
+      - UNS_ADD_BATCH_SIZE=500
       - OAUTH_REDIRECT_URI=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/inter-api/supos/auth/token
       - OAUTH_SUPOS_HOME=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home
       - OAUTH_REALM=${OAUTH_REALM}
@@ -54,16 +63,19 @@ services:
       - ELASTICSEARCH_TIMEHORIZON=${ELASTICSEARCH_TIMEHORIZON}
     ports:
       - "8091:8080"
-      - "7000:8000"
+      - "19099:19099"
     deploy:
       resources:
         limits:
-          memory: 3.2G
+          memory: 4G
         reservations:
-          memory: 1G
+          memory: 3G
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/backend/apps:/data/apps
+      - ${VOLUMES_PATH}/backend/third-apps:/data/third-apps
+      - ${VOLUMES_PATH}/plugins/package:/data/plugins
+      - plugin_front:/data/plugins-frontend
       - ${VOLUMES_PATH}/backend/uns:/data/uns
       - ${VOLUMES_PATH}/backend/system:/data/system
       - ${VOLUMES_PATH}/backend/log:/logs
@@ -80,6 +92,8 @@ services:
         condition: service_started
     networks:
       - default_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   emqx:
     image: emqx/emqx:5.8
     container_name: emqx
@@ -118,7 +132,10 @@ services:
       - service_description=aboutus.nodeRedDescription
       - FLOWS=/data/flows.json
       - TZ=UTC
+      - TIMESTAMP_NAME=timeStamp
+      - QUALITY_NAME=quality
       - OS_LANG=${LANGUAGE}
+      - USE_ALIAS_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
       - NODE_OPTIONS=--openssl-legacy-provider
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -212,7 +229,7 @@ services:
     networks:
       - default_network
   postgresql:
-    image: timescale/timescaledb:2.18.2-pg17
+    image: timescale/timescaledb:2.20.0-pg17
     container_name: postgresql
     environment:
       service_logo: postgresql-original.svg
@@ -221,9 +238,14 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ${VOLUMES_PATH}/postgresql/conf/postgresql.conf:/etc/postgresql/custom.conf
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/postgresql/pgdata:/var/lib/postgresql/data # 持久化数据
       - ${VOLUMES_PATH}/postgresql/init-scripts:/docker-entrypoint-initdb.d  # 加载初始化脚本
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/custom.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -231,6 +253,44 @@ services:
       retries: 10
       start_period: 30s
       start_interval: 60s
+    restart: always
+    networks:
+      - default_network
+  tsdb:
+    image: timescale/timescaledb:2.20.0-pg17
+    container_name: tsdb
+    profiles:
+      - tsdb
+    environment:
+      TZ: UTC  # 设置容器时区
+      service_logo: postgresql-original.svg
+      service_description: aboutus.postgresqlDescription
+      POSTGRES_PASSWORD: postgres
+    shm_size: '2g'
+    ports:
+      - "2345:5432"
+    volumes:
+      - ${VOLUMES_PATH}/tsdb/conf/postgresql.conf:/etc/postgresql/custom.conf
+      - ${VOLUMES_PATH}/tsdb/data:/var/lib/postgresql/data # 持久化数据
+      - ${VOLUMES_PATH}/tsdb/init-scripts:/docker-entrypoint-initdb.d  # 加载初始化脚本
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/custom.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+      start_interval: 60s
+    restart: always
+    deploy:
+     resources:
+       limits:
+         memory: 4G
+       reservations:
+         memory: 3G
     networks:
       - default_network
   hasura:
@@ -390,6 +450,7 @@ services:
       - ${VOLUMES_PATH}/tdengine/data:/var/lib/taos # 持久化数据
       - ${VOLUMES_PATH}/tdengine/log:/var/log/taos   # 持久化日志
     environment:
+      - TZ=UTC
       - service_logo=tdengine-original.svg
       - service_description=aboutus.tdengineDescription
       - TDENGINE_ROOT_PASSWORD=taosdata # 设置 root 用户密码
@@ -499,6 +560,7 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
+    restart: always
     networks:
       - default_network
   fuxa:
@@ -530,6 +592,7 @@ services:
     environment:
       - service_logo=chat2db.svg
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: always
     networks:
       - default_network
   gitea:
@@ -558,6 +621,7 @@ services:
       - GITEA__oauth2_client__ENABLE_AUTO_REGISTRATION=true
     volumes:
       - ${VOLUMES_PATH}/gitea:/data
+    restart: always
     networks:
       - default_network
   runner:
@@ -579,5 +643,8 @@ services:
       - 11223:11223
     depends_on:
       - gitea
+    restart: always
     networks:
       - default_network
+volumes:
+  plugin_front:
