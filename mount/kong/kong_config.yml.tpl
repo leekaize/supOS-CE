@@ -365,14 +365,13 @@ services:
   tags:
   - root:frontend
   - Home:1
-  - SourceFlow:2
-  - Namespace:3
+  - SourceFlow:3
+  - Namespace:2
   - EventFlow:4
-  - CollectionGatewayManagement:5
-  - menu.tag.devtools:6
+  - menu.tag.devtools:5
   - menu.tag.uns:1
-  - menu.tag.appspace:7
-  - menu.tag.system:8
+  - menu.tag.appspace:6
+  - menu.tag.system:7
   ca_certificates: ~
   client_certificate: ~
   enabled: true
@@ -701,7 +700,7 @@ routes:
   - description:menu.desc.cicd
   - sort:1
   - parentName:menu.tag.devtools
-  - menu
+  - ${ENABLE_GITEA_MENU}
   snis: ~
 - sources: ~
   destinations: ~
@@ -957,7 +956,7 @@ routes:
   - description:menu.desc.dataModeling
   - homeParentName:menu.tag.uns
   - homeIconUrl:homeNamespace
-  - sort:2
+  - sort:1
   snis: ~
 - sources: ~
   destinations: ~
@@ -1436,7 +1435,7 @@ routes:
   tags:
   - menu
   - description:menu.desc.nodered.flow
-  - sort:1
+  - sort:2
   - homeParentName:menu.tag.uns
   - homeIconUrl:homeSourceFlow
   snis: ~

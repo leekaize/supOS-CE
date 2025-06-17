@@ -25,6 +25,12 @@ else
    echo "MQTT_PLUG=emqx" >> $SCRIPT_DIR/../.env.tmp
 fi
 
+if echo "$commands" | grep -q "gitea"; then
+   echo "ENABLE_GITEA_MENU=menu" >> $ENV_TMP
+else
+   echo "ENABLE_GITEA_MENU=none" >> $ENV_TMP
+fi
+
 if echo "$1" | grep -q "mcpclient"; then
    echo "ENABLE_MCP=menu" >> $SCRIPT_DIR/../.env.tmp
 else 
@@ -36,8 +42,4 @@ if [ $ENTRANCE_PORT == '80' ] || [ $ENTRANCE_PORT == '443' ]; then
   REDIRECT_BASE_URL=$ENTRANCE_PROTOCOL://$ENTRANCE_DOMAIN
 fi
 echo "BASE_URL=$REDIRECT_BASE_URL" >> $SCRIPT_DIR/../.env.tmp
-if [ "$OS_RESOURCE_SPEC" == "1" ]; then
-    echo "ENABLE_PORTAINER=none" >> $SCRIPT_DIR/../.env.tmp
-else 
-    echo "ENABLE_PORTAINER=menu" >> $SCRIPT_DIR/../.env.tmp
-fi
+echo "ENABLE_PORTAINER=menu" >> $SCRIPT_DIR/../.env.tmp
