@@ -166,7 +166,7 @@ services:
       - default_network
   mcpclient:
     container_name: mcpclient
-    image: suposce/supos-ce-mcpclient:latest
+    image: suposce/supos-ce-mcpclient:RELEASE.2025-06-16T07-08-29Z
     profiles:
       - mcpclient
     ports:
@@ -179,6 +179,7 @@ services:
       - SUPOS_API_KEY=${SUPOS_API_KEY}
       - SUPOS_API_URL=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}
       - SUPOS_MQTT_URL=${SUPOS_MQTT_URL}
+      - SUPOS_PG_URL=postgresql://postgres:postgres@postgresql:5432/postgres
     healthcheck:
       test: >
         /bin/bash -c "
