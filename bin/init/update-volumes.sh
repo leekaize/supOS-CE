@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 set -e
 
@@ -31,7 +31,7 @@ cp -r $SCRIPT_DIR/../mount/backend/system/* $VOLUMES_PATH/backend/system/
 cp -r $SCRIPT_DIR/../mount/backend/ $VOLUMES_PATH/backend/
 mkdir -p $VOLUMES_PATH/fuxa/appdata/ && cp $SCRIPT_DIR/../mount/fuxa/appdata/settings.js $VOLUMES_PATH/fuxa/appdata/
 
-cp $SCRIPT_DIR/../mount/plugins/package/*.tar.gz $VOLUMES_PATH/plugins/package/
+cp $SCRIPT_DIR/../mount/plugins/package/*.tar.gz $VOLUMES_PATH/plugins/package/ 2>/dev/null || true
 
 chown 999:0 -R $VOLUMES_PATH/postgresql
 chown 1000:1000 -R $VOLUMES_PATH/emqx

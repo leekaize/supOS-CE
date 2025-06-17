@@ -249,11 +249,11 @@ services:
       - config_file=/etc/postgresql/custom.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-      start_interval: 60s
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 120s
+      start_interval: 10s
     restart: always
     networks:
       - default_network
