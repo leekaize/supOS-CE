@@ -1,7 +1,7 @@
 {
   "supmodel": {
     "label_name": "Name",
-    "node_name": "UNS Selector",
+    "node_name": "UNS Mapper",
     "page_previous": "Previous",
     "page_next": "Next",
     "label_serial": "Serial",

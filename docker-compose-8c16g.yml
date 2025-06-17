@@ -47,7 +47,7 @@ services:
       - SYS_OS_USE_ALIAS_PATH_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
       - SYS_OS_QUALITY_NAME=quality
       - SYS_OS_TIMESTAMP_NAME=timeStamp
-      - SYS_OS_LAZY_TREE=${LAZY_TREE}
+      - SYS_OS_LAZY_TREE=false
       - MQTT_PLUGIN=emqx
       - UNS_ADD_BATCH_SIZE=500
       - OAUTH_REDIRECT_URI=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/inter-api/supos/auth/token
