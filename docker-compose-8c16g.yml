@@ -248,9 +248,9 @@ services:
       - -c
       - config_file=/etc/postgresql/custom.conf
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 15s
-      timeout: 15s
+      test: ["CMD-SHELL", "psql -U postgres -d keycloak -c '\\dt public.initialization_complete' | grep -q 'initialization_complete'"]
+      interval: 30s
+      timeout: 30s
       retries: 15
       start_period: 120s
       start_interval: 10s
@@ -358,6 +358,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 120
+      start_period: 120s    # 新增：给予2分钟的启动宽限期
+      start_interval: 10s   # 新增：宽限期内的检查间隔
     restart: always
     networks:
       - default_network
