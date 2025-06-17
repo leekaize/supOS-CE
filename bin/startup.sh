@@ -146,6 +146,9 @@ Proceed without login? (y/N): " confirm_ip
   echo -e "\n"
 fi
 
+# Source the latest ENTRANCE_DOMAIN
+source $SCRIPT_DIR/../.env
+
 # Execute the installation docker script
 source $SCRIPT_DIR/install-deb/install-docker.sh
 
