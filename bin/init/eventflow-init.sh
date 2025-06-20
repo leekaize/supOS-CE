@@ -2,9 +2,9 @@
 
 # exit error
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
-source $SCRIPT_DIR/../global/log.sh
+#
+#SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+#source $SCRIPT_DIR/../global/log.sh
 
 times=5
 
