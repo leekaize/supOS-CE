@@ -2043,7 +2043,7 @@ plugins:
   instance_name: ~
   route: ~
   id: 1845ee75-d704-40e1-a8b0-aa2baaf9d71b
-  enabled: true
+  enabled: ${KONG_AUTH_ENABLED}
   protocols:
   - grpc
   - grpcs
@@ -2078,7 +2078,7 @@ plugins:
   instance_name: ~
   route: 9df937e7-2ffb-49f4-b60b-4bb5b551419a
   id: 2285421f-56e3-4510-be12-69fa1040d810
-  enabled: true
+  enabled: false
   protocols:
   - grpc
   - grpcs
