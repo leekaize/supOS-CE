@@ -520,12 +520,7 @@ services:
     image: pantsel/konga:0.14.9
     container_name: konga
     environment:
-      # DB_ADAPTER: mysql           # 使用 MySQL 作为数据库
-      # DB_HOST: konga_mysql_database # MySQL 容器的主机名
-      # DB_USER: konga               # MySQL 用户
-      # DB_PASSWORD: konga           # MySQL 用户密码
-      # DB_DATABASE: konga          # MySQL 数据库名
-      # NODE_ENV: production           # 设置 NODE_ENV 为生产环境
+      NODE_ENV: production           # 设置 NODE_ENV 为生产环境
       NO_AUTH: "true"             # 禁用认证
       KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: /node.data
     ports:
