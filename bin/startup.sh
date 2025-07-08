@@ -194,9 +194,9 @@ fi
 
 
 if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.tmp --project-name supos $command -f $DOCKER_COMPOSE_FILE up -d && \
-   source $SCRIPT_DIR/init/init-nodered.sh $1 && \
-   source $SCRIPT_DIR/init/eventflow-init.sh 1889 eventflow $1 && \
-   source $SCRIPT_DIR/init/init-minio.sh $1 > /dev/null 2>&1 && \
+   source $SCRIPT_DIR/init/init-nodered.sh "${1:-}" && \
+   source $SCRIPT_DIR/init/eventflow-init.sh 1889 eventflow "${1:-}" && \
+   source $SCRIPT_DIR/init/init-minio.sh "${1:-}" > /dev/null 2>&1 && \
    source $SCRIPT_DIR/init/init-portainer.sh; then
 
     echo -e "\n============================================================"
