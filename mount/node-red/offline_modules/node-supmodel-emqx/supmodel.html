@@ -103,7 +103,7 @@
     <div class="form-row">
         <ul style="min-width: 600px; margin-bottom: 20px;" id="node-config-supmodel-tabs"></ul>
     </div>
-    <div id="node-config-supmodel-tabs-content" style="min-height:150px;min-width: 1000px;">
+    <div id="node-config-supmodel-tabs-content" style="min-height:150px;min-width: 1000px;">	
         <div id="supmodel-tab-basicinfo" style="display:none">
 
             <div class="form-row node-input-broker">
@@ -185,10 +185,10 @@
         </div>
     </div>
     
-
+    
 </script>
 
-<script type="text/javascript">
+<script type="text/javascript"> 
 (function() {
     // const lang = RED.i18n.detectLanguage();
 
@@ -469,7 +469,7 @@
                     } else {
                         data.data.fields.map((f, index) => {
                             // const lastSlashIndex = data.data.path.lastIndexOf('/');
-                            // let folder = lastSlashIndex !== -1 ? data.data.path.substring(0, (lastSlashIndex+1)) : '';
+                            // let folder = lastSlashIndex !== -1 ? data.data.path.substring(0, (lastSlashIndex+1)) : ''; 
                             if (!f.systemField) { // 排除系统字段
                                 let fieldType = f.type.toLowerCase();
                                 templateModels[node.id].push([data.data.path, alias, f.name, fieldType, i+'']);
@@ -540,7 +540,7 @@
             // if (!regFileName.test(name)) {
             //     return node._("supmodel.label_serial") + ` ${index} ` + node._("supmodel.label_data_error") + ": " + node._("supmodel.error_invalid_filename")
             // }
-
+            
         }
         return "";
         
@@ -600,7 +600,7 @@
     }
     let templateModels = {};
     let tabs;
-
+    
     RED.nodes.registerType('supmodel', {
         category: 'supnodes',
         color: '#66CDAA',
@@ -647,7 +647,7 @@
                 return this.modelShowName;
             }
             return this._('supmodel.node_name');
-
+            
         },
         paletteLabel: function () {
             return this._('supmodel.node_name');
@@ -712,7 +712,7 @@
             let downloadBtn = $("#node-btn-item-dowbload");
 			let removeBtn = $("#node-btn-item-remove");
             let addBtn = $("#node-btn-item-add");
-			let itemFile = $("#node-file-item");
+			let itemFile = $("#node-file-item");	
 			
             
 			importBtn.click(function() {
@@ -751,7 +751,7 @@
                         node.tableValid = false;
                         RED.notify(errorMsg, "error");
                         RED._debug(errorMsg)
-                        return false;
+                        return false; 
                     }
                     if (!templateModels[node.id]) {
                         templateModels[node.id] = [];
@@ -761,12 +761,12 @@
                     pagenation.pageTotal = Math.ceil(templateModels[node.id].length / pagenation.pageItem);
 				    renderTable(node, templateModels[node.id]);
                 });
-
+                
                 $('#preview-tbody .dirty .remove').on('click', function() {
                     $(this).closest('tr').remove();
                 });
             });
-
+			
 			removeBtn.click(function() {
                 resetPage();
                 templateModels[node.id] = [];
@@ -825,7 +825,7 @@
             pagenation.pageNo = 1;
 
             let thisModels = templateModels[node.id];
-
+           
             let errorMsg = checkTable(node, thisModels);
             if (errorMsg) {
                 node.tableValid = false;
@@ -841,7 +841,7 @@
                 if (this.modelShowName.length > 30) {
                     this.modelShowName = this.modelShowName.substring(0, 30).concat("...");
                 }
-                this.modelShowName = selectedPrefix + this.modelShowName;
+                this.modelShowName = selectedPrefix + this.modelShowName; 
             }
 
             if (thisModels) {
@@ -854,7 +854,7 @@
                     saveTags(node, []);
                 }
             }
-
+            
             if (!firstLoad) {
                 createDynamicMqttBroker(RED);
                 firstLoad = true;

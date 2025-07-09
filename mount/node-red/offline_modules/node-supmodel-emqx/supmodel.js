@@ -57,10 +57,10 @@ module.exports = function (RED) {
         }
         const options = {
             sheetOptions: {
-                '!cols': [{ wch: 35 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 30 }]
+                '!cols': [{ wch: 35 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 30 }] 
             }
         };
-        const buffer = xlsx.build([{
+        const buffer = xlsx.build([{ 
             name: 'UNS Data',   // 工作表名称
             data: data        // 数据源
         }], options)
