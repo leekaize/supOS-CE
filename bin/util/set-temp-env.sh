@@ -25,7 +25,7 @@ else
    echo "MQTT_PLUG=emqx" >> $SCRIPT_DIR/../.env.tmp
 fi
 
-if echo "$commands" | grep -q "gitea"; then
+if echo "$1"  | grep -q "gitea"; then
    echo "ENABLE_GITEA_MENU=menu" >> $SCRIPT_DIR/../.env.tmp
 else
    echo "ENABLE_GITEA_MENU=none" >> $SCRIPT_DIR/../.env.tmp
