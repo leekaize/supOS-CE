@@ -34,4 +34,3 @@ else
   keytool -importcert -trustcacerts -alias "$CERT_ALIAS" -file "$CERT_FILE" \
     -keystore "$KEYSTORE" -storepass "$STORE_PASS" -noprompt
 fi
-
