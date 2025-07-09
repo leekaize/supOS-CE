@@ -359,7 +359,6 @@ services:
       KC_DB_POOL_MAX_LIFETIME: 1800
       KC_HEALTH_ENABLED: true
       KC_FEATURES: token-exchange
-      JAVA_OPTS_APPEND: -Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/keycloak/data:/opt/keycloak/data  # 将 Keycloak 的数据目录挂载到本地
