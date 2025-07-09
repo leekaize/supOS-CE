@@ -369,14 +369,7 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy  # 依赖 PostgreSQL 的健康状态
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        chmod +x /opt/keycloak/init-ldaps-cert.sh && \
-        bash /opt/keycloak/init-ldaps-cert.sh && \
-        exec /opt/keycloak/bin/kc.sh start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth --proxy-headers forwarded
-#    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
+    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
     healthcheck:
       test: >
         /bin/bash -c "
