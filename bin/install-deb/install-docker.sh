@@ -34,7 +34,16 @@ check_versions() {
         exit 1
     fi
 
-    echo "Docker and Docker Compose meet the required versions."
+    info "Docker and Docker Compose meet the required versions."
+}
+
+replace_daemon_json() {
+    DAEMON_JSON_FILE="/etc/docker/daemon.json"
+    if [ ! -f "$DAEMON_JSON_FILE" ]; then
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+        mkdir -p /etc/docker
+        cp $SCRIPT_DIR/config/daemon.json $DAEMON_JSON_FILE
+    fi
 }
 
 # 安装 Docker
@@ -95,6 +104,7 @@ main() {
         else
           install_docker_offline
         fi
+        replace_daemon_json
         open_docker_api
     fi
 }
