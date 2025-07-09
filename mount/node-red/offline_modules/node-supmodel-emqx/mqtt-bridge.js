@@ -10,7 +10,7 @@ class MqttBridge {
     timer;
 
     mappings;
-
+    
     constructor(node, mappings, interval) {
         this.queue = q.newQueue();
         this.mappings = mappings;
@@ -72,7 +72,7 @@ class MqttBridge {
 
 
 function transfer(msg, mappings, envs) {
-
+    
     let useAlias = envs.use_alias;
 
     let topicResult = {};
