@@ -23,7 +23,7 @@ services:
       - default_network
     restart: always
   backend:
-    image:  suposce/supos-ce-backend:1.0.9-T12
+    image:  suposce/supos-ce-backend:1.0.9-T13
     container_name: backend
     environment:
       - TZ=UTC
