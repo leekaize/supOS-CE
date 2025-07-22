@@ -1776,6 +1776,31 @@ routes:
   snis: ~
 - sources: ~
   destinations: ~
+  id: 66241a12-0c3e-40f4-8ca6-03fb69d02977
+  methods: ~
+  regex_priority: 0
+  hosts: ~
+  preserve_host: false
+  https_redirect_status_code: 426
+  created_at: 1729852903
+  updated_at: 1749260359
+  service: 6a3bcaba-7ba3-4c3b-b5c2-1a8ecbc571ac
+  request_buffering: true
+  path_handling: v1
+  response_buffering: true
+  headers: ~
+  paths:
+  - /dashboard
+  - /dashboard/
+  strip_path: false
+  name: dashboard2
+  protocols:
+  - http
+  - https
+  tags: []
+  snis: ~
+- sources: ~
+  destinations: ~
   id: e3459f2d-fcb2-412e-87fc-b098d8906b7e
   methods: ~
   regex_priority: 0
