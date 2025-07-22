@@ -3200,6 +3200,7 @@ INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539f
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/uns');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/DBConnect');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/EventFlow');
+INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/dashboard');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/CollectionGatewayManagement');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/gitea');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/grafana/home/');
