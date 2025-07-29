@@ -540,7 +540,7 @@ services:
     networks:
       - default_network
   konga:
-    image: supos/konga:arm64
+    image: suposce/konga:1.0.0
     container_name: konga
     environment:
       NODE_ENV: production           # 设置 NODE_ENV 为生产环境

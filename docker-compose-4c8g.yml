@@ -453,7 +453,7 @@ services:
     networks:
       - default_network
   konga:
-    image: suposce/konga:arm64
+    image: suposce/konga:1.0.0
     container_name: konga
     environment:
       # DB_ADAPTER: mysql           # 使用 MySQL 作为数据库
