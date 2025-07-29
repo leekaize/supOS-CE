@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: suposce/supos-ce-platform:1.0.9-T12
+    image: suposce/supos-ce-platform:1.0.9-T13
     container_name: frontend
     ports:
       - "3010:3000"
@@ -23,7 +23,7 @@ services:
       - default_network
     restart: always
   backend:
-    image:  suposce/supos-ce-backend:1.0.9-T13
+    image:  suposce/supos-ce-backend:1.0.9-T14
     container_name: backend
     environment:
       - TZ=UTC
@@ -540,7 +540,7 @@ services:
     networks:
       - default_network
   konga:
-    image: pantsel/konga:0.14.9
+    image: suposce/konga:1.0.0
     container_name: konga
     environment:
       NODE_ENV: production           # 设置 NODE_ENV 为生产环境
