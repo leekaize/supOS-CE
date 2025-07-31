@@ -20,7 +20,8 @@ confirm_uninstall() {
 
 uninstall_docker() {
   echo "🧹 Removing Docker-related packages..."
-  sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras || true
+  #sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras || true
+  sudo dpkg -r docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras || true
 
   echo "🧹 Deleting Docker data directories (/var/lib/docker and /var/lib/containerd)..."
   sudo rm -rf /var/lib/docker
