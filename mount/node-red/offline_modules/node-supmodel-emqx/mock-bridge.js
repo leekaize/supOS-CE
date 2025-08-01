@@ -13,6 +13,7 @@ class MockDataBridge {
         this.timer = setInterval(() => {
             let newMsg = this.queue.poll();
             if (newMsg != null) {
+                newMsg.topic = newMsg.topic || (node.envs.use_alias === true ? node.selectedModelAlias : node.selectedModel)
                 node.send([newMsg, null])
             }
         }, interval); // mock数据1秒推送一次
