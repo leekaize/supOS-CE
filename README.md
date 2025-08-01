@@ -62,12 +62,22 @@ In the **Namespace** section:
   Quality/qualityAnalysis
   ```
 ![Namespace](./image/namespace.png)
-- For folders: only name is required.
-- For namespaces（file icon）:
-  - Choose data type: time-series or relational.
-  - Enable **Persistence** if needed.
-  - Leave other settings as default.
 
+- Reverse creation of namespaces through MQTT
+  1. Use an MQTT client, connect to the internal broker of supOS-CE.
+     ![Namespace](./image/1.png)
+  2. Define a topic and messages inside, send it.
+     ![Namespace](./image/2.png)
+  3. Click **Topic to File** under **Namespcae**, edit the file and complete the namespace creation.
+     ![Namespace](./image/3.png)
+
+- Batch import of napespaces through Excel table
+  1. Export a file from **Namespace** as a template.
+     ![Namespace](./image/4.png)
+  2. Fill in the template according to the folder-file structure.
+     ![Namespace](./image/5.png)![Namespace](./image/6.png)![Namespace](./image/7.png)
+  3. Import the file and complete the namespace creation.
+     ![Namespace](./image/8.png)
 These actions will generate MQTT topics in supOS’s internal broker.
 
 ---
