@@ -228,6 +228,8 @@ module.exports = function (RED) {
         }
 
         node.protocol = config.protocol;
+        node.selectedModel = config.selectedModel;
+        node.selectedModelAlias = config.selectedModelAlias;
         node.models = loadStorage(node.id);
         node.envs = {
             "field_t_var": process.env.TIMESTAMP_NAME,
