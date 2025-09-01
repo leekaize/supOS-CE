@@ -1,5 +1,8 @@
 # supOS: An Open-Source IIoT Platform
+
+[![Try supOS](https://img.shields.io/badge/Try%20supOS-Live%20Demo-blue?style=flat&logo=rocket)](https://supos.ai/trial)
 [![Docs](https://img.shields.io/badge/docs-available-brightgreen?style=flat&logo=readthedocs)](https://suposcommunity.vercel.app)
+[![License](https://img.shields.io/badge/License-Apache_2.0-yellow?style=flat&logo=open-source-initiative)](./LICENSE)
 
 **supOS** is an open-source industrial data integration platform built on the **Unified Namespace (UNS)** methodology and powered by production-grade open-source technologies.
 
@@ -26,6 +29,16 @@
   Orchestrates Namespaces into higher-level event/information flows. Supports merging JSON payloads and appending system-generated prompts for LLM-powered optimization.
 
 ---
+
+## Hardware Requirements
+
+|             | Minimum Requirement                  | Recommended Requirement                       |
+|-------------|--------------------------------------|-----------------------------------------------|
+| CPU         | 4 cores                              | 8 cores                                       |
+| Memory      | 8 GB                                 | 16 GB                                         |
+| Disk        | 100 GB, 1000 IOPS (30% random write)      | 1 TB, 2000 IOPS (30% random write)        |
+| Browser     | Chrome 89, Edge 89, Firefox 89, Safari 15 | Chrome 89, Edge 89, Firefox 89, Safari 15 |
+
 
 ## Quick Start
 
