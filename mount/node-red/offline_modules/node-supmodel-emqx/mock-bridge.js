@@ -14,7 +14,7 @@ class MockDataBridge {
             let newMsg = this.queue.poll();
             if (newMsg != null) {
                 newMsg.topic = newMsg.topic || (node.envs.use_alias === true ? node.selectedModelAlias : node.selectedModel)
-                node.send([newMsg, null])
+                node.send([newMsg])
             }
         }, interval); // mock数据1秒推送一次
 
