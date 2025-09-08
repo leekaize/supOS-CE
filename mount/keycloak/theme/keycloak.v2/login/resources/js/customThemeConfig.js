@@ -1,11 +1,15 @@
 import { request } from "./request.js";
 
 const checkUrl = (dom, url, defaultUrl) => {
-  dom.src = url;
-  dom.onerror = function () {
-    this.onerror = null;
-    this.src = defaultUrl;
-  };
+  if(url){
+    dom.src = url;
+    dom.onerror = function () {
+      this.onerror = null;
+      this.src = defaultUrl;
+    };
+  }else{
+    dom.src = defaultUrl;
+  }
 };
 
 export const handleTheme = async (keycloakUrl, lang) => {
@@ -83,19 +87,24 @@ export const handleTheme = async (keycloakUrl, lang) => {
     }
   }
 
+  const useDefaultTheme = () => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    updateDarkMode(mediaQuery.matches);
+    mediaQuery.addEventListener("change", (event) =>
+      updateDarkMode(event.matches)
+    );
+  };
+
   try {
     const themeConfig = await request(`/inter-api/supos/theme/getConfig`);
     if (themeConfig) {
       updateDarkMode(themeConfig?.loginPageType, themeConfig);
     } else {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      updateDarkMode(mediaQuery.matches);
-      mediaQuery.addEventListener("change", (event) =>
-        updateDarkMode(event.matches)
-      );
+      useDefaultTheme();
     }
     document.body.style.opacity = 1;
   } catch (err) {
+    useDefaultTheme();
     document.body.style.opacity = 1;
     console.log(err);
   }

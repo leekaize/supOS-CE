@@ -1,8 +1,6 @@
 .pf-v5-c-login__container {
   grid-template-columns: 20rem;
-  grid-template-areas:
-    "header"
-    "main";
+  grid-template-areas: "header" "main";
 }
 
 .login-pf body {
@@ -17,6 +15,7 @@
   padding: 0;
   align-items: stretch;
 }
+
 .pf-v5-c-login-left {
   width: 100%;
   display: flex;
@@ -30,6 +29,7 @@
   background-repeat: no-repeat;
   background-position: bottom;
 }
+
 .pf-v5-c-login-l-top {
   display: flex;
   justify-content: space-between;

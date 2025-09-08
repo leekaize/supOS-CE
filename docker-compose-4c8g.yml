@@ -19,9 +19,12 @@ services:
       - REACT_APP_OS_LANG=${LANGUAGE}
     volumes:
       - plugin_front:/app/plugins-build
+      - /etc/docker/certs:/certs
     networks:
       - default_network
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   backend:
     image:  suposce/supos-ce-backend:1.0.10-T1
     container_name: backend
@@ -63,6 +66,8 @@ services:
       - ELASTICSEARCH_TIMEHORIZON=${ELASTICSEARCH_TIMEHORIZON}
       - SYS_OS_LDAP_ENABLE=${LDAP_ENABLE}
       - SYS_OS_LDAP_URL=${LDAP_URL}
+      - SYNC_USER_ENABLE=${SYNC_USER_ENABLE}
+      - SUPOS_EE_ADDRESS=${SUPOS_EE_ADDRESS}
     ports:
       - "8091:8080"
       - "19099:19099"
@@ -81,6 +86,12 @@ services:
       - ${VOLUMES_PATH}/backend/uns:/data/uns
       - ${VOLUMES_PATH}/backend/system:/data/system
       - ${VOLUMES_PATH}/backend/log:/logs
+      - ${VOLUMES_PATH}/backend/global-export:/data/global-export
+      - ${VOLUMES_PATH}/i18n:/data/i18n
+      - ${VOLUMES_PATH}/backend/excel:/data/excel
+      - /etc/docker/certs:/certs
+    cap_add:
+      - SYS_PTRACE
     depends_on:
       - postgresql
       - emqx
@@ -134,6 +145,7 @@ services:
       - TZ=UTC
       - OS_LANG=${LANGUAGE}
       - NODE_OPTIONS=--openssl-legacy-provider
+      - NODE_HTTP_API_PREFIX=/nodered-api
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/node-red:/data  # 使用当前目录的 data 目录
@@ -152,9 +164,13 @@ services:
       - service_logo=nodered-original.svg
       - service_description=aboutus.nodeRedDescription
       - FLOWS=/data/flows.json
+      - USE_ALIAS_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
+      - QUALITY_NAME=status
+      - TIMESTAMP_NAME=timeStamp
       - TZ=UTC
       - OS_LANG=${LANGUAGE}
       - NODE_OPTIONS=--openssl-legacy-provider
+      - NODE_HTTP_API_PREFIX=/eventflow-api
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/eventflow:/data  # 使用当前目录的 data 目录
@@ -295,6 +311,7 @@ services:
     container_name: keycloak
     ports:
       - "8081:8080"
+    user: root
     deploy:
       resources:
         limits:
@@ -312,7 +329,7 @@ services:
       KC_HOSTNAME: "${ENTRANCE_DOMAIN}"              # 指定主机名
       KC_FRONTEND_URL: "https://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}"  # 设置前端 URL
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: Supos@1304
       KC_COOKIE_SECURE: false                          # 禁用安全 cookie
       KC_DB: postgres
       KC_DB_URL: "jdbc:postgresql://postgresql:5432/keycloak"
@@ -324,7 +341,9 @@ services:
       KC_DB_POOL_MAX_LIFETIME: 1800
       KC_HEALTH_ENABLED: true
       KC_FEATURES: token-exchange
+      JAVA_OPTS_APPEND: -Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/keycloak/data:/opt/keycloak/data  # 将 Keycloak 的数据目录挂载到本地
       - ${VOLUMES_PATH}/keycloak/theme/keycloak.v2:/opt/keycloak/themes/wenhao
       - ${VOLUMES_PATH}/keycloak/ca/ca.crt:/opt/keycloak/ca.crt
@@ -332,7 +351,14 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy  # 依赖 PostgreSQL 的健康状态
-    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        chmod +x /opt/keycloak/init-ldaps-cert.sh && \
+        bash /opt/keycloak/init-ldaps-cert.sh && \
+        exec /opt/keycloak/bin/kc.sh start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth --proxy-headers forwarded
+#    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
     healthcheck:
       test: >
         /bin/bash -c "
@@ -410,7 +436,7 @@ services:
     image: kong:3.9.0
     container_name: kong
     environment:
-      KONG_WORKER_STATE_UPDATE_FREQUENCY: 10
+      KONG_WORKER_STATE_UPDATE_FREQUENCY: 30
       KONG_DB_CACHE_TTL: 600
       KONG_NGINX_WORKER_PROCESSES: 4
       KONG_LUA_GC_PAUSE: 100            # 提高暂停率，降低 GC 触发频率
@@ -445,10 +471,7 @@ services:
       - frontend
       - keycloak
       - postgresql
-    command: >
-      sh -c "kong migrations bootstrap &&
-             kong config db_import /etc/kong/kong_config.yml &&
-             kong start"
+    command: ["sh", "/usr/local/bin/start.sh"]
     restart: always  # 确保 Kong 自动重启
     networks:
       - default_network
