@@ -145,7 +145,7 @@ Proceed without login? (y/N): " confirm_ip
 fi
 
 # 执行安装docker、yq
-source $SCRIPT_DIR/deb/install-docker.sh && source $SCRIPT_DIR/deb/install-yq.sh
+source $SCRIPT_DIR/deb/install-docker.sh
 
 # 选择需要启动哪些服务
 if [ ! -f $VOLUMES_PATH/backend/system/active-services.txt ]; then 
