@@ -3155,7 +3155,6 @@ INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956d
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/collection-gateway-detail');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/CodeManagement');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/code-management');
-INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/hasura');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/connection-flow');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/SourceFlow');
 INSERT INTO "public"."resource_uris" VALUES ('216ea471-fa25-441c-bbd3-3b14ae956db1', '/app-gui');
