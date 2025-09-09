@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: suposce/supos-ce-platform:1.0.10-T1
+    image: suposce/supos-ce-platform:1.0.11-T1
     container_name: frontend
     ports:
       - "3010:3000"
@@ -26,7 +26,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
   backend:
-    image:  suposce/supos-ce-backend:1.0.10-T1
+    image:  suposce/supos-ce-backend:1.0.11-T1
     container_name: backend
     environment:
       - TZ=UTC
@@ -385,14 +385,7 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy  # 依赖 PostgreSQL 的健康状态
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        chmod +x /opt/keycloak/init-ldaps-cert.sh && \
-        bash /opt/keycloak/init-ldaps-cert.sh && \
-        exec /opt/keycloak/bin/kc.sh start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth --proxy-headers forwarded
-#    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
+    command: start-dev --hostname ${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/keycloak/home/auth  --proxy-headers forwarded
     healthcheck:
       test: >
         /bin/bash -c "

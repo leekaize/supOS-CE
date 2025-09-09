@@ -1,3 +1,5 @@
+\c postgres;
+CREATE SCHEMA supos;
 CREATE TABLE IF NOT EXISTS "supos"."supos_resource" (
 "id" BIGSERIAL PRIMARY KEY,
 "group_type" int2,

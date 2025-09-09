@@ -4875,3 +4875,11 @@ ALTER TABLE "public"."user_role_mapping" ADD CONSTRAINT "fk_c4fqv34p1mbylloxang7
 -- Foreign Keys structure for table web_origins
 -- ----------------------------
 ALTER TABLE "public"."web_origins" ADD CONSTRAINT "fk_lojpho213xcx4wnkog82ssrfy" FOREIGN KEY ("client_id") REFERENCES "public"."client" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+
+DROP TABLE IF EXISTS "public"."initialization_complete";
+CREATE TABLE "public"."initialization_complete" (
+  "completed_at" timestamp with time zone
+);
+INSERT INTO "public"."initialization_complete" VALUES (now());
