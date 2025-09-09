@@ -320,26 +320,6 @@ services:
          memory: 3G
     networks:
       - default_network
-  hasura:
-    image: hasura/graphql-engine:v2.36.8-ce  # 指定 Hasura 的镜像版本
-    container_name: hasura
-    ports:
-      - "8090:8080"  # 将主机的 8090 端口映射到容器的 8080 端口
-    environment:
-      - service_logo=hasura-original.svg
-      - service_description=aboutus.hasuraDescription
-      - service_redirect_url=/hasura/home/
-      - HASURA_GRAPHQL_DATABASE_URL=postgres://postgres:postgres@postgresql:5432/postgres
-      - HASURA_GRAPHQL_ENABLE_CONSOLE=true
-      - HASURA_GRAPHQL_SERVER_ROOT_PATH=/hasura/home
-      - HASURA_GRAPHQL_METADATA_RETRY_INTERVAL=5000 # Wait for 5 seconds before retrying connection
-      - HASURA_GRAPHQL_DATABASE_CONNECTION_TIMEOUT=120 # Set connection timeout to 120 seconds
-    depends_on:
-      postgresql:
-        condition: service_healthy  # 依赖 PostgreSQL 的健康状态
-    restart: always
-    networks:
-      - default_network
   keycloak:
     image: keycloak/keycloak:26.0  # 使用 Keycloak 的最新镜像
     container_name: keycloak

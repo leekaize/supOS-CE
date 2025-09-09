@@ -1,6 +1,6 @@
 #!/bin/bash
 
-activeServices="emqx,nodered,hasura,keycloak,kong,postgresql,chat2db,portainer"
+activeServices="emqx,nodered,keycloak,kong,postgresql,chat2db,portainer"
 profileCommand=""
 OUTPUT_FILE=$SCRIPT_DIR/global/active-services.txt
 # ENV_TMP=$SCRIPT_DIR/../.env.tmp
