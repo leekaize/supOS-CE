@@ -74,44 +74,6 @@ docker exec $NODERED_SERVICE sh -c "cd /data && npm install --offline --prefix /
 # overide js file
 docker exec $NODERED_SERVICE sh -c 'cp /data/override/*.js /usr/src/node-red/node_modules/@node-red/editor-client/public/red/' >/dev/null
 
-docker exec --user 0 $NODERED_SERVICE bash -c "node -e '
-const fs = require(\"fs\");
-const p = \"/data/.config.nodes.json\";
-
-// 读取配置文件
-const j = JSON.parse(fs.readFileSync(p, \"utf8\"));
-
-// 获取 node-red-contrib-modbus 模块的节点
-const modbusPkg = j[\"node-red-contrib-modbus\"];
-if(modbusPkg && modbusPkg.nodes) {
-    const modbusKeep = new Set([\"Modbus-Read\", \"Modbus-Client\", \"Modbus-Server\"]);
-    for (const [name, meta] of Object.entries(modbusPkg.nodes)) {
-        meta.enabled = modbusKeep.has(name);
-    }
-    console.log(\"Updated Modbus nodes\");
-} else {
-    console.error(\"node-red-contrib-modbus not found\");
-}
-
-// 获取 node-red-contrib-opcua 模块的节点
-const opcuaPkg = j[\"node-red-contrib-opcua\"];
-if(opcuaPkg && opcuaPkg.nodes) {
-    const opcuaKeep = new Set([\"OpcUa-Item\", \"OpcUa-Client\", \"OpcUa-Server\"]);
-    for (const [name, meta] of Object.entries(opcuaPkg.nodes)) {
-        meta.enabled = opcuaKeep.has(name);  // 如果是 keep 中的节点，启用
-    }
-    console.log(\"Updated OPC UA nodes\");
-} else {
-    console.error(\"node-red-contrib-opcua not found\");
-}
-
-// 保存更新后的 JSON 文件
-fs.writeFileSync(p, JSON.stringify(j, null, 2));
-console.log(\"Updated:\", p);
-'"
-
-
-
 
 
 docker restart $NODERED_SERVICE >/dev/null

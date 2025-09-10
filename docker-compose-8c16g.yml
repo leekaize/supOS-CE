@@ -103,6 +103,7 @@ services:
         condition: service_started
       chat2db:
         condition: service_started
+    restart: always
     networks:
       - default_network
     extra_hosts:

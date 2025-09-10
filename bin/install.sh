@@ -192,6 +192,7 @@ if docker compose --env-file $SCRIPT_DIR/../.env --env-file $SCRIPT_DIR/../.env.
 echo "Starting initialization, may take several minutes...."  && \
 source $SCRIPT_DIR/init/init-nodered.sh nodered 1880  && \
 source $SCRIPT_DIR/init/init-eventflow.sh eventflow 1889 &&  \
+source $SCRIPT_DIR/init/hide-nodered.sh nodered 1880  && \
 source $SCRIPT_DIR/init/init-minio.sh $1 > /dev/null 2>&1 && \
 source $SCRIPT_DIR/init/init-portainer.sh; then
 

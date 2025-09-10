@@ -507,6 +507,24 @@ services:
   path: /
   name: chat2db
   write_timeout: 60000
+- tags: []
+  ca_certificates: ~
+  write_timeout: 60000
+  id: bbca0a6c-dd2d-4325-a717-dad6ec99036e
+  tls_verify: ~
+  path: /eventflow-api/
+  client_certificate: ~
+  host: eventflow
+  port: 1889
+  updated_at: 1757473099
+  enabled: true
+  tls_verify_depth: ~
+  created_at: 1757473048
+  connect_timeout: 60000
+  protocol: http
+  name: eventflow-backend
+  read_timeout: 60000
+  retries: 5
 - tls_verify: ~
   tls_verify_depth: ~
   id: df4453f0-063a-4346-a074-3c2f9a388ca7
@@ -1490,6 +1508,30 @@ routes:
   - parentName:menu.tag.appspace
   - sort:2
   snis: ~
+- request_buffering: true
+  headers: ~
+  https_redirect_status_code: 426
+  strip_path: true
+  path_handling: v1
+  preserve_host: true
+  paths:
+  - /eventflow-api/
+  protocols:
+  - http
+  - https
+  sources: ~
+  destinations: ~
+  service: bbca0a6c-dd2d-4325-a717-dad6ec99036e
+  created_at: 1757473262
+  methods: ~
+  tags: ~
+  hosts: ~
+  name: eventflow-backend
+  response_buffering: true
+  regex_priority: 0
+  snis: ~
+  id: 7be131e8-6caf-42bb-8ceb-a125c44c662f
+  updated_at: 1757473262
 - sources: ~
   destinations: ~
   id: a5040934-75dd-40c6-94ea-9497ab2b0579

@@ -98,6 +98,7 @@ services:
       - nodered
       - keycloak
       - chat2db
+    restart: always
     networks:
       - default_network
     extra_hosts:
