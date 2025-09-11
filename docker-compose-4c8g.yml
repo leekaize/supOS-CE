@@ -89,6 +89,7 @@ services:
       - chat2db
     networks:
       - default_network
+    restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
   emqx:
