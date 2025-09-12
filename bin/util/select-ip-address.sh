@@ -80,7 +80,7 @@ trimmed_ip=$(echo "$selected_ip" | xargs) # Trim potential whitespace
 
 if [[ "$trimmed_ip" == "127.0.0.1" || "$trimmed_ip" == "localhost" ]]; then
   echo
-  read -rp "⚠️ WARNING: You are using a loopback address. Login/authentication will NOT work. Proceed without login? (y/N): " confirm_ip
+  read -rp "⚠️ WARNING: You are using a loopback address. Oauth funciton will NOT work. Proceed without login? (y/N): " confirm_ip
   if [[ ! "$confirm_ip" =~ ^[yY]$ ]]; then
     error "Aborted by user."
     exit 1
