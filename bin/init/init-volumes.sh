@@ -7,9 +7,8 @@ if [ -z "${VOLUMES_PATH}" ]; then
   VOLUMES_PATH=/volumes/supos/data
 fi
 # load npm cache
-tar -zxvf $SCRIPT_DIR/../mount/node-red/npmCache.tar.gz -C $SCRIPT_DIR/../mount/node-red/ > /dev/null 2>&1
-tar -zxvf $SCRIPT_DIR/../mount/node-red/npmCache.tar.gz -C $SCRIPT_DIR/../mount/eventflow/ > /dev/null 2>&1
-
+tar -xf $SCRIPT_DIR/../mount/node-red/npmCache.tar.xz -C $SCRIPT_DIR/../mount/node-red/ > /dev/null 2>&1
+tar -xf $SCRIPT_DIR/../mount/node-red/npmCache.tar.xz -C $SCRIPT_DIR/../mount/eventflow/ > /dev/null 2>&1
 
 info "loading npm cache complete."
 find $SCRIPT_DIR/../mount/grafana/data/plugins/ -type f -name "*.tar.gz" -exec tar -xzvf {} -C $SCRIPT_DIR/../mount/grafana/data/plugins/ \;

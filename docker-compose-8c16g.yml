@@ -6,7 +6,7 @@ networks:
 
 services:
   frontend:
-    image: suposce/supos-ce-platform:1.0.10-T1
+    image: suposce/supos-ce-platform:1.0.11-T1
     container_name: frontend
     ports:
       - "3010:3000"
@@ -19,11 +19,14 @@ services:
       - REACT_APP_OS_LANG=${LANGUAGE}
     volumes:
       - plugin_front:/app/plugins-build
+      - /etc/docker/certs:/certs
     networks:
       - default_network
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   backend:
-    image:  suposce/supos-ce-backend:1.0.10-T1
+    image:  suposce/supos-ce-backend:1.0.11-T1
     container_name: backend
     environment:
       - TZ=UTC
@@ -63,6 +66,8 @@ services:
       - ELASTICSEARCH_TIMEHORIZON=${ELASTICSEARCH_TIMEHORIZON}
       - SYS_OS_LDAP_ENABLE=${LDAP_ENABLE}
       - SYS_OS_LDAP_URL=${LDAP_URL}
+      - SYNC_USER_ENABLE=${SYNC_USER_ENABLE}
+      - SUPOS_EE_ADDRESS=${SUPOS_EE_ADDRESS}
     ports:
       - "8091:8080"
       - "19099:19099"
@@ -81,6 +86,12 @@ services:
       - ${VOLUMES_PATH}/backend/uns:/data/uns
       - ${VOLUMES_PATH}/backend/system:/data/system
       - ${VOLUMES_PATH}/backend/log:/logs
+      - ${VOLUMES_PATH}/backend/global-export:/data/global-export
+      - ${VOLUMES_PATH}/i18n:/data/i18n
+      - ${VOLUMES_PATH}/backend/excel:/data/excel
+      - /etc/docker/certs:/certs
+    cap_add:
+      - SYS_PTRACE
     depends_on:
       postgresql:
         condition: service_healthy
@@ -92,6 +103,7 @@ services:
         condition: service_started
       chat2db:
         condition: service_started
+    restart: always
     networks:
       - default_network
     restart: always
@@ -140,6 +152,7 @@ services:
       - OS_LANG=${LANGUAGE}
       - USE_ALIAS_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
       - NODE_OPTIONS=--openssl-legacy-provider
+      - NODE_HTTP_API_PREFIX=/nodered-api
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/node-red:/data  # 使用当前目录的 data 目录
@@ -158,9 +171,13 @@ services:
       - service_logo=nodered-original.svg
       - service_description=aboutus.nodeRedDescription
       - FLOWS=/data/flows.json
+      - USE_ALIAS_AS_TOPIC=${USE_ALIAS_PATH_AS_TOPIC}
+      - QUALITY_NAME=status
+      - TIMESTAMP_NAME=timeStamp
       - TZ=UTC
       - OS_LANG=${LANGUAGE}
       - NODE_OPTIONS=--openssl-legacy-provider
+      - NODE_HTTP_API_PREFIX=/eventflow-api
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/eventflow:/data  # 使用当前目录的 data 目录
@@ -180,7 +197,7 @@ services:
       - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
       - AGENT_DEPLOYMENT_URL=${AGENT_DEPLOYMENT_URL}
       - SUPOS_API_KEY=${SUPOS_API_KEY}
-      - SUPOS_API_URL=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}
+      - SUPOS_API_URL=${SUPOS_API_URL}
       - SUPOS_MQTT_URL=${SUPOS_MQTT_URL}
       - SUPOS_PG_URL=postgresql://postgres:postgres@postgresql:5432/postgres
     healthcheck:
@@ -305,26 +322,6 @@ services:
          memory: 3G
     networks:
       - default_network
-  hasura:
-    image: hasura/graphql-engine:v2.36.8-ce  # 指定 Hasura 的镜像版本
-    container_name: hasura
-    ports:
-      - "8090:8080"  # 将主机的 8090 端口映射到容器的 8080 端口
-    environment:
-      - service_logo=hasura-original.svg
-      - service_description=aboutus.hasuraDescription
-      - service_redirect_url=/hasura/home/
-      - HASURA_GRAPHQL_DATABASE_URL=postgres://postgres:postgres@postgresql:5432/postgres
-      - HASURA_GRAPHQL_ENABLE_CONSOLE=true
-      - HASURA_GRAPHQL_SERVER_ROOT_PATH=/hasura/home
-      - HASURA_GRAPHQL_METADATA_RETRY_INTERVAL=5000 # Wait for 5 seconds before retrying connection
-      - HASURA_GRAPHQL_DATABASE_CONNECTION_TIMEOUT=120 # Set connection timeout to 120 seconds
-    depends_on:
-      postgresql:
-        condition: service_healthy  # 依赖 PostgreSQL 的健康状态
-    restart: always
-    networks:
-      - default_network
   keycloak:
     image: keycloak/keycloak:26.0  # 使用 Keycloak 的最新镜像
     container_name: keycloak
@@ -360,6 +357,7 @@ services:
       KC_DB_POOL_MAX_LIFETIME: 1800
       KC_HEALTH_ENABLED: true
       KC_FEATURES: token-exchange
+      JAVA_OPTS_APPEND: -Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/keycloak/data:/opt/keycloak/data  # 将 Keycloak 的数据目录挂载到本地
@@ -483,7 +481,7 @@ services:
     image: kong:3.9.0
     container_name: kong
     environment:
-      KONG_WORKER_STATE_UPDATE_FREQUENCY: 10
+      KONG_WORKER_STATE_UPDATE_FREQUENCY: 30
       KONG_DB_CACHE_TTL: 600
       KONG_NGINX_WORKER_PROCESSES: 4
       KONG_LUA_GC_PAUSE: 100            # 提高暂停率，降低 GC 触发频率
@@ -518,10 +516,7 @@ services:
       - frontend
       - keycloak
       - postgresql
-    command: >
-      sh -c "kong migrations bootstrap &&
-             kong config db_import /etc/kong/kong_config.yml &&
-             kong start"
+    command: ["sh", "/usr/local/bin/start.sh"]
     restart: always  # 确保 Kong 自动重启
     networks:
       - default_network
