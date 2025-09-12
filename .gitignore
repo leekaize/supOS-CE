@@ -10,7 +10,6 @@ build/
 *.iml
 *.iws
 .git/
-.gitattributes
 # OS specific files
 .DS_Store
 Thumbs.db
