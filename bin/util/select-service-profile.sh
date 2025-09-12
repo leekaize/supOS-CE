@@ -7,7 +7,7 @@ if [ ! -f "$VOLUMES_PATH/backend/system/active-services.txt" ]; then
     echo "------------------------------------------------------------"
     echo "This is a first-time installation."
     echo "The default profile will be installed."
-    echo -n "Press [Enter] within 3 seconds to choose a custom profile..."
+    echo -n "You can press [Enter] within 3 seconds to choose a custom profile..."
 
     if read -t 3; then
         # MANUAL SELECTION: Call the function in interactive mode (no arguments)
@@ -19,7 +19,7 @@ if [ ! -f "$VOLUMES_PATH/backend/system/active-services.txt" ]; then
         fi
     else
         # AUTOMATIC DEFAULT (TIMEOUT): Call the function in non-interactive "default" mode
-        echo; info "Timeout reached. Applying default profile..."
+        echo; info "Applying default profile..."
         if [ "$OS_RESOURCE_SPEC" == "1" ]; then
             command=$(chooseProfile1 "default")
         else
