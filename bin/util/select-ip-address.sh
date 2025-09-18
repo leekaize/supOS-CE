@@ -69,6 +69,7 @@ fi
 if [ "$selected_ip" != "$current_entrance_domain" ]; then
     escaped_selected_ip=$(sed 's/[&]/\\&/g' <<< "$selected_ip")
     sed -i "s|^ENTRANCE_DOMAIN=.*|ENTRANCE_DOMAIN=$escaped_selected_ip|" "$SCRIPT_DIR/../.env"
+    source "$SCRIPT_DIR/../.env"
 fi
 
 
