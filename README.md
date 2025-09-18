@@ -6,7 +6,7 @@
 
 **supOS** is an open-source industrial data integration platform built on the **Unified Namespace (UNS)** methodology and powered by production-grade open-source technologies.
 
-<img width="750" src="./image/arc02.png" />
+<img width="750" src="./image/Update_open source program.jpg" />
 
 ---
 
