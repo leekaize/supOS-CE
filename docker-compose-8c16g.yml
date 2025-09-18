@@ -453,29 +453,6 @@ services:
         condition: service_healthy
     networks:
       - default_network
-  tdengine:
-    image: tdengine/tdengine:3.3.5.0
-    profiles:
-      - tdengine
-    container_name: tdengine
-    ports:
-      - "6030:6030"   # TDengine 服务端口
-      - "6041:6041"   # TDengine 数据库管理端口
-      - "6042:6042"   # TDengine 代理服务端口
-      - "6043:6043"   # TDengine SQL 端口
-      - "6060:6060"   # TDengine 后端页面
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${VOLUMES_PATH}/tdengine/data:/var/lib/taos # 持久化数据
-      - ${VOLUMES_PATH}/tdengine/log:/var/log/taos   # 持久化日志
-    environment:
-      - TZ=UTC
-      - service_logo=tdengine-original.svg
-      - service_description=aboutus.tdengineDescription
-      - TDENGINE_ROOT_PASSWORD=taosdata # 设置 root 用户密码
-      - TD_ENGINE_ROOT_USER=root
-    networks:
-      - default_network
   kong:
     image: kong:3.9.0
     container_name: kong
@@ -580,24 +557,6 @@ services:
       keycloak:
         condition: service_healthy
     restart: always
-    networks:
-      - default_network
-  fuxa:
-    container_name: fuxa
-    profiles:
-      - fuxa
-    image: suposce/supos-ce-fuxa:1.0.5-T13
-    environment:
-      - LANG=${FUXA_LANG:-en}
-      - service_logo=fuxa.svg
-    restart: unless-stopped
-    volumes:
-      - ${VOLUMES_PATH}/fuxa/appdata:/usr/src/app/FUXA/server/_appdata
-      - ${VOLUMES_PATH}/fuxa/db:/usr/src/app/FUXA/server/_db
-      - ${VOLUMES_PATH}/fuxa/logs:/usr/src/app/FUXA/server/_logs
-      - ${VOLUMES_PATH}/fuxa/images:/usr/src/app/FUXA/server/_images
-    ports:
-      - '1881:1881'
     networks:
       - default_network
   chat2db:
