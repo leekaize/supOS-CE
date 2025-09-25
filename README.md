@@ -11,7 +11,7 @@
 ---
 
 ## Architecture Overview
-<img width="750" src="./image/func.jpg" />
+<img width="750" src="./image/function_update.png" />
 
 - **Source Flow**  
   Serves as the connection pipeline to devices and systems. It handles real-time protocol translation into JSON payloads. Built entirely on Node-RED.
@@ -148,7 +148,7 @@
 ### 2. Model Data Source Connection
 > Connect real data to make models alive.
 1. Log in to supOS, go to **UNS** > **Namespace**, and under the **Topic** tab, select a file.
-2. Scroll down to **Topology**, click the icon on **Source Flow** to redirect to the generated data flow under **Source Flow**.
+2. Scroll down to **Topology**, click the icon on **Source Flow** to redirect to the generated data flow.
 
 <img width="650" src="http://communityimage2.oss-cn-hangzhou.aliyuncs.com/49.png" />
 
