@@ -33,4 +33,6 @@ else
     command=$(sed -n '2p' "$VOLUMES_PATH/backend/system/active-services.txt")
 fi
 
-echo
+declare -g COMPOSE_PROFILE_ARGS_STR="$command"
+
+declare -ag COMPOSE_PROFILE_ARGS=($command)

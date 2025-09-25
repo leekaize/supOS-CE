@@ -53,6 +53,8 @@ services:
       - SYS_OS_LAZY_TREE=${LAZY_TREE}
       - MQTT_PLUGIN=${MQTT_PLUG:-emqx}
       - UNS_ADD_BATCH_SIZE=500
+      - ENABLE_CHAT2DB=true
+      - HASP_SERVER=${HASP_SERVER}
       - OAUTH_REDIRECT_URI=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/inter-api/supos/auth/token
       - OAUTH_SUPOS_HOME=${ENTRANCE_PROTOCOL}://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}/home
       - OAUTH_REALM=${OAUTH_REALM}
@@ -69,14 +71,13 @@ services:
       - SYNC_USER_ENABLE=${SYNC_USER_ENABLE}
       - SUPOS_EE_ADDRESS=${SUPOS_EE_ADDRESS}
     ports:
-      - "8091:8080"
       - "19099:19099"
     deploy:
       resources:
         limits:
-          memory: 4G
-        reservations:
           memory: 3G
+        reservations:
+          memory: 2G
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${VOLUMES_PATH}/backend/apps:/data/apps
@@ -137,7 +138,7 @@ services:
       - default_network
   nodered:
     image: nodered/node-red:4.0.8-22
-    container_name: nodered
+    container_name: noderedF
     user: root
     ports:
       - "1880:1880"  # Node-RED web UI端口
@@ -163,6 +164,8 @@ services:
   eventflow:
     image: nodered/node-red:4.0.8-22
     container_name: eventflow
+    profiles:
+      - eventflow
     user: root
     ports:
       - "1889:1889"  # Node-RED web UI端口
@@ -225,11 +228,11 @@ services:
       service_description: aboutus.grafanaDescription
       service_redirect_url: /grafana/home/dashboards/
       # 设置管理员用户的初始密码
-      GF_SECURITY_ADMIN_PASSWORD: "Supos@1304"
+      GF_SECURITY_ADMIN_PASSWORD: "supos"
       # 开启 Grafana 的 Explore 功能
       GF_EXPLORE_ENABLED: "true"
       # 安装 Grafana 插件
-#      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-mqtt-datasource,tdengine-datasource,yesoreyeram-infinity-datasource"
+      # GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-mqtt-datasource,tdengine-datasource,yesoreyeram-infinity-datasource"
       # 注释掉的设置，用于改变 Grafana 用户界面的语言
       GF_VIEWER_LANGUAGE: "${GRAFANA_LANG:-en-US}"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
@@ -256,7 +259,6 @@ services:
       service_logo: postgresql-original.svg
       service_description: aboutus.postgresqlDescription
       POSTGRES_PASSWORD: postgres
-    shm_size: '2g'
     ports:
       - "5432:5432"
     volumes:
@@ -278,23 +280,14 @@ services:
     restart: always
     networks:
       - default_network
-    deploy:
-     resources:
-       limits:
-         memory: 4G
-       reservations:
-         memory: 3G
   tsdb:
     image: timescale/timescaledb:2.20.0-pg17
     container_name: tsdb
-    profiles:
-      - tsdb
     environment:
       TZ: UTC  # 设置容器时区
       service_logo: postgresql-original.svg
       service_description: aboutus.postgresqlDescription
       POSTGRES_PASSWORD: postgres
-    shm_size: '2g'
     ports:
       - "2345:5432"
     volumes:
@@ -313,12 +306,6 @@ services:
       start_period: 30s
       start_interval: 60s
     restart: always
-    deploy:
-     resources:
-       limits:
-         memory: 4G
-       reservations:
-         memory: 3G
     networks:
       - default_network
   keycloak:
@@ -338,13 +325,13 @@ services:
       service_description: aboutus.keycloakDescription
       service_redirect_url: /keycloak/home/
       service_account: admin
-      service_password: Supos1304@
+      service_password: supos
       KC_SSL_REQUIRED: none  # 不要求 SSL
       KC_PROXY: passthrough                       # 设置代理模式
       KC_HOSTNAME: "${ENTRANCE_DOMAIN}"              # 指定主机名
       KC_FRONTEND_URL: "https://${ENTRANCE_DOMAIN}:${ENTRANCE_PORT}"  # 设置前端 URL
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: Supos@1304
+      KC_BOOTSTRAP_ADMIN_PASSWORD: supos
       KC_COOKIE_SECURE: false                          # 禁用安全 cookie
       KC_DB: postgres
       KC_DB_URL: "jdbc:postgresql://postgresql:5432/keycloak"
@@ -390,8 +377,6 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx768m  # 最小 512MB，最大 768m
       #    volumes:
       #      - es_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
     healthcheck:
       #      test: ["CMD-SHELL", "curl -fsSL http://elasticsearch:9200/_cluster/health | grep -q '\"status\":\"green\"'"]
       test: [ "CMD", "curl", "-f", "http://elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=1s" ]
@@ -399,14 +384,7 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1G
-    #       cpus: '0.2'
-    #     reservations:
-    #       memory: 1G
-    #       cpus: '0.1'
+    restart: always
     networks:
       - default_network
   kibana:
@@ -430,6 +408,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+    restart: always
     networks:
       - default_network
   filebeat:
@@ -451,6 +430,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+    restart: always
     networks:
       - default_network
   kong:
