@@ -2302,7 +2302,7 @@ plugins:
   instance_name: ~
   consumer: ~
   id: 1845ee75-d704-40e1-a8b0-aa2baaf9d71b
-  enabled: true
+  enabled: ${KONG_AUTH_ENABLED}
   route: ~
   config:
     forbidden_url: /403
