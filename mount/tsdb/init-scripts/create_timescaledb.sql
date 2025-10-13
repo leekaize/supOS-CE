@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_string" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" text NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -35,7 +35,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_integer" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" int4 NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -65,7 +65,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_long" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" int8 NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -96,7 +96,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_double" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" float8 NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -127,7 +127,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_float" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" float4 NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -157,7 +157,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_boolean" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" BOOLEAN  NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -187,7 +187,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_datetime" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" timestamptz(3) NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );
@@ -217,7 +217,7 @@ SELECT add_compression_policy(
 CREATE TABLE IF NOT EXISTS public."supos_timeserial_blob" (
     "tag" int8 NOT NULL,
     "timeStamp" timestamptz(3) NOT NULL DEFAULT now(),
-    "status" int8 default 0,
+    "quality" int8 default 0,
     "value" varchar(512) NULL,
     PRIMARY KEY ("tag", "timeStamp")
 );

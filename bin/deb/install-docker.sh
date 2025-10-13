@@ -37,15 +37,6 @@ check_versions() {
     info "Docker and Docker Compose meet the required versions."
 }
 
-replace_daemon_json() {
-    DAEMON_JSON_FILE="/etc/docker/daemon.json"
-    if [ ! -f "$DAEMON_JSON_FILE" ]; then
-        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
-        mkdir -p /etc/docker
-        cp $SCRIPT_DIR/config/daemon.json $DAEMON_JSON_FILE
-    fi
-}
-
 # 安装 Docker
 install_docker_online() {
     echo "Installing Docker using online APT repository..."
@@ -65,11 +56,6 @@ install_docker_online() {
 }
 
 install_docker_offline() {
-    # 检查系统架构和操作系统版本
-    if ! grep -q 'NAME="Ubuntu"' /etc/os-release || ! grep -q 'VERSION_CODENAME=noble' /etc/os-release; then
-        error "This product only runs on Ubuntu 24.04 LTS."
-        exit 1
-    fi
 
     # 检查架构是否为x86_64
     architecture=$(dpkg --print-architecture)
@@ -78,9 +64,29 @@ install_docker_offline() {
         exit 1
     fi
 
-    # 安装离线包
-    info "Installing Docker using offline .deb packages..."
-    sudo dpkg -i $SCRIPT_DIR/../debs/docker/*.deb
+    source /etc/os-release
+
+    if [ "$VERSION_ID" == "24.04" ]; then
+        # 安装离线包
+        echo "Installing Docker using offline ubuntu24 .deb packages..."
+        sudo dpkg -i $SCRIPT_DIR/../debs/docker/ubuntu24/*.deb
+    elif [ "$VERSION_ID" == "20.04" ]; then
+        # 安装离线包
+        echo "Installing Docker using offline ubuntu20 .deb packages..."
+        sudo dpkg -i $SCRIPT_DIR/../debs/docker/ubuntu20/*.deb
+    else
+        error "This product only runs on Ubuntu 20.04.2 LTS or 24.04 LTS."
+        exit 1
+    fi
+
+}
+
+replace_daemon_json() {
+    DAEMON_JSON_FILE="/etc/docker/daemon.json"
+    if [ ! -f "$DAEMON_JSON_FILE" ]; then
+        mkdir -p /etc/docker
+        cp $SCRIPT_DIR/deb/config/daemon.json $DAEMON_JSON_FILE
+    fi
 }
 
 open_docker_api() {
