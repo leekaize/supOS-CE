@@ -24,7 +24,7 @@ source "$SCRIPT_DIR/deb/install-docker.sh"
 source "$SCRIPT_DIR/util/select-service-profile.sh"
 
 # --- 5. Pre-run Initialization ---
-source "$SCRIPT_DIR/util/set-temp-env.sh" "$SCRIPT_DIR/../" "$command"
+source "$SCRIPT_DIR/util/set-temp-env.sh" "$SCRIPT_DIR/../" "${COMPOSE_PROFILE_ARGS[@]}"
 source "$SCRIPT_DIR/init/init-keycloak-sql.sh" "$SCRIPT_DIR/.."
 source "$SCRIPT_DIR/init/init-kong-property.sh" "$SCRIPT_DIR/.."
 
@@ -60,7 +60,7 @@ fi
 
 # --- 7. Main Execution: Start services and run post-init scripts ---
 info "Starting Docker containers in detached mode..."
-if ! docker compose --env-file "$SCRIPT_DIR/../.env" --env-file "$SCRIPT_DIR/../.env.tmp" --project-name supos $command -f "$DOCKER_COMPOSE_FILE" up -d; then
+if ! docker compose --env-file "$SCRIPT_DIR/../.env" --env-file "$SCRIPT_DIR/../.env.tmp" --project-name supos "${COMPOSE_PROFILE_ARGS[@]}" -f "$DOCKER_COMPOSE_FILE" up -d; then
     error "Failed to start Docker containers. Please check the logs above."
     exit 1
 fi
@@ -69,9 +69,9 @@ echo
 
 # Run each initialization script individually for clearer error reporting
 {
-    source "$SCRIPT_DIR/init/init-nodered.sh" nodered 1880 && \
-    source "$SCRIPT_DIR/init/init-eventflow.sh" eventflow 1889 && \
-    source "$SCRIPT_DIR/init/hide-nodered.sh" nodered 1880 && \
+    source "$SCRIPT_DIR/init/init-nodered.sh"  && \
+    source "$SCRIPT_DIR/init/init-eventflow.sh"  && \
+    source "$SCRIPT_DIR/init/hide-nodered.sh"  && \
     source "$SCRIPT_DIR/init/init-minio.sh" "$1" > /dev/null 2>&1 && \
     source "$SCRIPT_DIR/init/init-portainer.sh"
 } || {
@@ -91,5 +91,6 @@ else
 fi
 
 echo -e "      $PLATFORM_URL\n"
-echo -e "    Default superadmin and password : supos/supos \n"
+echo -e "    Default user name: supos\n"
+echo -e "            password: supos\n"
 echo -e "============================================================"

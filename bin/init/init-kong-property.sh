@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 # ... comments ...
 set -e
-
-# Variable is renamed to be unique to this script
-KONG_INIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
+ROOT_DIR=$1
 # ---------------------------------------------------------------------------
 # 0. Normalise .env line endings (Windows → Unix)
 # ---------------------------------------------------------------------------
 # Use the new variable name
-sed -i 's/\r$//' "$KONG_INIT_DIR/../../.env"
+sed -i 's/\r$//' "$ROOT_DIR/.env"
 
 # ---------------------------------------------------------------------------
 # 1. Load variables from .env
 # ---------------------------------------------------------------------------
 # Use the new variable name
-export $(grep -v '^#' "$KONG_INIT_DIR/../../.env" | xargs)
+export $(grep -v '^#' "$ROOT_DIR/.env" | xargs)
 
 # ---------------------------------------------------------------------------
 # 2. Build BASE_URL
@@ -42,16 +39,17 @@ fi
 # 4. Load .env.tmp overrides (if the file exists)
 # ---------------------------------------------------------------------------
 # Use the new variable name
-if [[ -f "$KONG_INIT_DIR/../../.env.tmp" ]]; then
- export $(grep -v '^#' "$KONG_INIT_DIR/../../.env.tmp" | xargs)
+if [[ -f "$ROOT_DIR/.env.tmp" ]]; then
+ export $(grep -v '^#' "$ROOT_DIR/.env.tmp" | xargs)
 fi
 
+echo  $ENABLE_ELK_MENU
 # ---------------------------------------------------------------------------
 # 6. Render Kong configuration
 # ---------------------------------------------------------------------------
 # Use the new variable name
-TEMPLATE_FILE="$KONG_INIT_DIR/../../mount/kong/kong_config.yml.tpl"
-OUTPUT_FILE="$KONG_INIT_DIR/../../mount/kong/kong_config.yml"
+TEMPLATE_FILE=$ROOT_DIR/mount/kong/kong_config.yml.tpl
+OUTPUT_FILE=$ROOT_DIR/mount/kong/kong_config.yml
 
 rm -f "$OUTPUT_FILE"
 envsubst < "$TEMPLATE_FILE" > "$OUTPUT_FILE"

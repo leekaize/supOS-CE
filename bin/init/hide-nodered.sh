@@ -3,14 +3,12 @@
 set -e
 
 times=5
-NODERED_SERVICE=$1
-NODERED_PORT=$2
 
 info "start to init protocol nodes...."
 
 while (( times > 0 )); do
     # 检查端口是否开启
-    if lsof -i :$NODERED_PORT > /dev/null 2>&1; then
+    if lsof -i :1880 > /dev/null 2>&1; then
         break  # 端口开启后退出循环
     else
         (( times-- ))
@@ -95,4 +93,4 @@ NODE'
 
 
 
-docker restart $NODERED_SERVICE >/dev/null
+docker restart nodered >/dev/null
