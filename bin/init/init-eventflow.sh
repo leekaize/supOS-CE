@@ -19,8 +19,8 @@ done
 
 
 # --verbose
-docker exec eventflow sh -c "cd /data && npm install --no-audit --offline @supcon-international/node-red-dev-copilot@1.7.5" \
-|| error "node-red install node-red-dev-copilot failed!"
+#docker exec eventflow sh -c "cd /data && npm install --no-audit --offline @supcon-international/node-red-dev-copilot@1.7.5" \
+#|| error "node-red install node-red-dev-copilot failed!"
 
 docker exec eventflow sh -c "cd /data && npm install --no-audit --offline @flowfuse/node-red-dashboard@1.26.0" \
 || error "node-red install node-red-dashboard failed!"
