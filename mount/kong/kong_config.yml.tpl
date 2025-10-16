@@ -66,6 +66,24 @@ services:
   retries: 5
   port: 3000
   host: gitea
+- enabled: true
+  id: 26effc32-8aa5-4d21-b86a-f14add8afc87
+  tags: []
+  ca_certificates: ~
+  write_timeout: 60000
+  connect_timeout: 60000
+  client_certificate: ~
+  read_timeout: 60000
+  path: ~
+  host: marimo
+  port: 8080
+  tls_verify: ~
+  name: marimo
+  tls_verify_depth: ~
+  created_at: 1760594820
+  updated_at: 1760594820
+  retries: 5
+  protocol: http
 - name: hasura
   tags: []
   ca_certificates: ~
@@ -1102,6 +1120,30 @@ routes:
   tags:
   - description:menu.desc.graphQL
   destinations: ~
+- sources: ~
+  destinations: ~
+  snis: ~
+  service: 26effc32-8aa5-4d21-b86a-f14add8afc87
+  methods: ~
+  hosts: ~
+  regex_priority: 0
+  headers: ~
+  paths:
+  - /marimo/home/
+  id: c8fd090f-2ff9-499c-807b-139f6e5fb976
+  https_redirect_status_code: 426
+  path_handling: v1
+  strip_path: true
+  protocols:
+  - http
+  - https
+  preserve_host: false
+  name: marimo
+  response_buffering: true
+  created_at: 1760594842
+  updated_at: 1760594842
+  request_buffering: true
+  tags: ~
 - snis: ~
   service: 4d210886-a694-416d-847d-95fc597f5921
   regex_priority: 0
@@ -2161,6 +2203,31 @@ routes:
   - sort:9
   - parentName:menu.tag.system
   destinations: ~
+- https_redirect_status_code: 426
+  strip_path: false
+  sources: ~
+  preserve_host: false
+  request_buffering: true
+  destinations: ~
+  service: 6a3bcaba-7ba3-4c3b-b5c2-1a8ecbc571ac
+  methods: ~
+  created_at: 1760593302
+  updated_at: 1760593714
+  headers: ~
+  id: f3121c84-e787-4eb6-a054-edbc56df4d0e
+  paths:
+  - /dashboard
+  - /dashboard/
+  path_handling: v1
+  response_buffering: true
+  snis: ~
+  hosts: ~
+  regex_priority: 0
+  tags: ~
+  protocols:
+  - http
+  - https
+  name: dashboard2
 - snis: ~
   service: 8e081976-8223-4494-9b4c-0aa5a441bdd5
   regex_priority: 0
