@@ -3207,6 +3207,8 @@ INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1
 INSERT INTO "public"."resource_uris" VALUES ('77f52ac5-58cf-4d4b-b850-aa0ac0ace1b7', '/flow-editor');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/CICD');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/home');
+INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/dashboard');
+INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/marimo');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/grafana');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/McpClient');
 INSERT INTO "public"."resource_uris" VALUES ('e8768c3e-2de0-40e9-8edf-fe331c539fdf', '/collection-gateway-management');
