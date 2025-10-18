@@ -19,3 +19,8 @@ README_zh.md
 *.tmp
 *.temp
 images/*.tar
+
+.npm/
+golioth-websocket-datasource/
+grafana-mqtt-datasource/
+tdengine-datasource/

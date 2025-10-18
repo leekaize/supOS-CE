@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>supOS Orchestrator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">supOS Orchestrator</h1>
+                <p class="text-gray-600 mt-1">Platform management</p>
+            </div>
+
+            <div id="install-screen" class="hidden">
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold mb-2">Install supOS-CE</h2>
+                        <p class="text-gray-600">Deploy industrial IoT platform</p>
+                    </div>
+
+                    <div id="install-button-container" class="mb-6">
+                        <button id="install-btn" onclick="install()" class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 font-semibold text-lg">
+                            Install supOS-CE
+                        </button>
+                    </div>
+
+                    <div id="install-progress" class="hidden">
+                        <div class="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto font-mono text-xs mb-4">
+                            <div id="install-logs" class="text-green-400 space-y-1"></div>
+                        </div>
+                        <button onclick="location.reload()" class="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
+                            Refresh Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="monitoring-screen" class="hidden">
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold mb-2">Platform Status</h2>
+                            <p id="stack-status" class="text-gray-600">Loading...</p>
+                        </div>
+                        <button onclick="refresh()" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Controls</h2>
+                    <div class="flex gap-3">
+                        <button onclick="manage('start')" class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700">
+                            Start
+                        </button>
+                        <button onclick="manage('stop')" class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700">
+                            Stop
+                        </button>
+                        <button onclick="manage('restart')" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700">
+                            Restart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const res = await fetch('/api/supos/status');
+                const data = await res.json();
+
+                if (data.configured && data.installation_complete) {
+                    showMonitoring();
+                    updateStatus(data);
+                } else {
+                    showInstall();
+                }
+            } catch (e) {
+                showInstall();
+            }
+        }
+
+        function showInstall() {
+            document.getElementById('install-screen').classList.remove('hidden');
+            document.getElementById('monitoring-screen').classList.add('hidden');
+        }
+
+        function showMonitoring() {
+            document.getElementById('install-screen').classList.add('hidden');
+            document.getElementById('monitoring-screen').classList.remove('hidden');
+        }
+
+        function updateStatus(data) {
+            const el = document.getElementById('stack-status');
+            if (data.running) {
+                el.textContent = `${data.running_count}/${data.container_count} running`;
+                el.className = 'text-green-600 font-medium';
+            } else {
+                el.textContent = 'Services stopped';
+                el.className = 'text-gray-600';
+            }
+        }
+
+        async function refresh() {
+            const res = await fetch('/api/supos/status');
+            updateStatus(await res.json());
+        }
+
+        function install() {
+            const btn = document.getElementById('install-button-container');
+            const progress = document.getElementById('install-progress');
+            
+            btn.classList.add('hidden');
+            progress.classList.remove('hidden');
+
+            const logs = document.getElementById('install-logs');
+            const eventSource = new EventSource('/api/supos/install');
+            
+            let currentPhase = 'config';
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                const msg = data.message || '';
+                
+                if (data.type === 'complete') {
+                    eventSource.close();
+                    logs.innerHTML += '<div class="text-white">✓ Installation complete. Refreshing...</div>';
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+
+                if (data.type === 'error') {
+                    eventSource.close();
+                    logs.innerHTML += `<div class="text-red-400">✗ Error: ${msg}</div>`;
+                    return;
+                }
+
+                // Phase detection based on bin/install.sh output
+                if (currentPhase === 'config') {
+                    if (msg.includes('Installing Docker') || msg.includes('docker compose') || 
+                        msg.includes('Pulling') || msg.includes('pull')) {
+                        currentPhase = 'pull';
+                        markStepComplete('config');
+                        markStepActive('pull');
+                    }
+                }
+                
+                if (currentPhase === 'pull') {
+                    if (msg.includes('Creating') || msg.includes('Starting') || 
+                        msg.includes('started') || msg.includes('Container')) {
+                        currentPhase = 'start';
+                        markStepComplete('pull');
+                        markStepActive('start');
+                    }
+                }
+
+                logs.innerHTML += `<div>> ${msg}</div>`;
+                logs.parentElement.scrollTop = logs.parentElement.scrollHeight;
+            };
+            
+            function markStepActive(step) {
+                const steps = {config: 1, pull: 2, start: 3};
+                const el = document.getElementById(`step-${step}`);
+                if (!el) return;
+                el.classList.remove('opacity-50');
+                el.querySelector('.text-gray-600').textContent = step.charAt(0).toUpperCase() + step.slice(1) + 'ing...';
+            }
+            
+            function markStepComplete(step) {
+                const el = document.getElementById(`step-${step}`);
+                if (!el) return;
+                el.classList.remove('opacity-50');
+                el.querySelector('.text-gray-500').textContent = 'Complete';
+            }
+        }
+
+        async function manage(action) {
+            if (!confirm(`${action.toUpperCase()} all services?`)) return;
+            
+            try {
+                const res = await fetch(`/api/supos/${action}`, { method: 'POST' });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert(data.message);
+                    refresh();
+                } else {
+                    alert(`Failed: ${data.error || data.message}`);
+                }
+            } catch (e) {
+                alert(`Error: ${e.message}`);
+            }
+        }
+
+        checkStatus();
+        setInterval(refresh, 10000);
+    </script>
+</body>
+</html>
