@@ -41,7 +41,7 @@ def load_config():
         "admin": {"username": "", "email": "", "password_hash": ""},
         "system": {
             "platform_type": "linux",
-            "resource_spec": "4c8g",
+            "resource_spec": "4c8g",  # CHANGED: was "4c8g", store human-readable
             "name": "supOS-CE",
             "version": "V1.1.0.0-M",
             "volumes_path": DEFAULT_VOLUMES_PATH
@@ -91,6 +91,15 @@ def load_config():
         "features": {"lazy_tree": False, "chat2db_enabled": True},
         "update_check": {"enabled": True, "interval_hours": 6, "last_check": None}
     }
+
+
+def resource_spec_to_numeric(spec):
+    """Convert human-readable spec to numeric format for scripts."""
+    mapping = {
+        "4c8g": "1",
+        "8c16g": "2"
+    }
+    return mapping.get(spec, "1")  # Default to 4c8g if unknown
 
 
 def save_config(config):
@@ -298,22 +307,23 @@ def get_nested_value(data, path):
 
 
 def generate_env_file(config, template_path='/services/.env.template', output_path='/workspace/.env'):
-    """
-    Generate .env file from config.json using template.
-    Returns: (bool, str) - (success, message)
-    """
+    """Generate .env file from config.json using template."""
     try:
-        # Read template
         with open(template_path, 'r') as f:
             template = f.read()
         
-        # Replace all {{key.path}} with config values
         import re
         pattern = r'\{\{([^}]+)\}\}'
         
         def replace_placeholder(match):
             path = match.group(1).strip()
-            value = get_nested_value(config, path)
+            
+            # Special handling for resource_spec
+            if path == 'system.resource_spec':
+                spec = get_nested_value(config, path)
+                value = resource_spec_to_numeric(spec)
+            else:
+                value = get_nested_value(config, path)
             
             # Convert boolean to lowercase string (unquoted)
             if isinstance(value, bool):
@@ -323,21 +333,17 @@ def generate_env_file(config, template_path='/services/.env.template', output_pa
             if value is None:
                 return ''
             
-            # Quote all other values to prevent bash interpretation of special chars
-            # Escape any existing quotes in the value
+            # Quote all other values
             str_value = str(value).replace('"', '\\"')
             return f'"{str_value}"'
         
         env_content = re.sub(pattern, replace_placeholder, template)
         
-        # Write .env file
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, 'w') as f:
             f.write(env_content)
         
         return True, f"Generated {output_path} successfully"
         
-    except FileNotFoundError as e:
-        return False, f"Template not found: {e}"
     except Exception as e:
         return False, f"Failed to generate .env: {e}"

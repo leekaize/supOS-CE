@@ -18,21 +18,26 @@
                 <div class="flex justify-between items-center">
                     <div id="step-1-indicator" class="flex items-center step-active">
                         <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">1</div>
-                        <span class="ml-2 text-sm font-medium">System Check</span>
+                        <span class="ml-2 text-sm font-medium">System</span>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
+                    <div id="step-1b-indicator" class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">2</div>
+                        <span class="ml-2 text-sm font-medium">Volumes</span>
                     </div>
                     <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
                     <div id="step-2-indicator" class="flex items-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">2</div>
-                        <span class="ml-2 text-sm font-medium">Admin User</span>
+                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">3</div>
+                        <span class="ml-2 text-sm font-medium">Admin</span>
                     </div>
                     <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
                     <div id="step-3-indicator" class="flex items-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">3</div>
+                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">4</div>
                         <span class="ml-2 text-sm font-medium">Network</span>
                     </div>
                     <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
                     <div id="step-4-indicator" class="flex items-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">4</div>
+                        <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-semibold">5</div>
                         <span class="ml-2 text-sm font-medium">Confirm</span>
                     </div>
                 </div>
@@ -55,9 +60,61 @@
                 <button id="validate-btn" onclick="validateSystem()" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
                     Start Validation
                 </button>
-                <button id="step-1-next" onclick="nextStep(2)" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 hidden">
-                    Continue to Admin Setup
+                <button id="step-1-next" onclick="nextStep('1b')" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 hidden">
+                    Continue to Volumes
                 </button>
+            </div>
+
+            <div id="step-1b" class="step-content hidden">
+                <h2 class="text-xl font-semibold mb-4">⚠️ Volumes Path Configuration</h2>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>VOLUMES_PATH was set in .env before orchestrator started.</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div class="bg-gray-50 rounded p-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Current volumes location:</p>
+                        <code id="current-volumes-path" class="block bg-gray-800 text-green-400 px-3 py-2 rounded font-mono text-sm">
+                            Loading...
+                        </code>
+                        <div id="volumes-status" class="mt-2 text-sm"></div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded p-4">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">To change VOLUMES_PATH:</p>
+                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                            <li>Stop orchestrator: <code class="bg-white px-1 rounded">docker compose down</code></li>
+                            <li>Edit <code class="bg-white px-1 rounded">.env</code> file on host</li>
+                            <li>Restart: <code class="bg-white px-1 rounded">docker compose up -d</code></li>
+                            <li>Return to this wizard</li>
+                        </ol>
+                    </div>
+
+                    <p class="text-sm text-gray-600">
+                        All supOS data (databases, configs, logs) will be stored here. Ensure sufficient disk space (20GB+ recommended).
+                    </p>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="prevStep('1')" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
+                        Back
+                    </button>
+                    <button onclick="nextStep('2')" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                        Continue with This Path
+                    </button>
+                </div>
             </div>
 
             <div id="step-2" class="step-content hidden">
@@ -92,10 +149,10 @@
                 </form>
 
                 <div class="flex gap-4 mt-6">
-                    <button onclick="prevStep(1)" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
+                    <button onclick="prevStep('1b')" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
                         Back
                     </button>
-                    <button onclick="nextStep(3)" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    <button onclick="nextStep('3')" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
                         Continue
                     </button>
                 </div>
@@ -130,10 +187,10 @@
                 </form>
 
                 <div class="flex gap-4 mt-6">
-                    <button onclick="prevStep(2)" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
+                    <button onclick="prevStep('2')" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
                         Back
                     </button>
-                    <button onclick="nextStep(4)" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    <button onclick="nextStep('4')" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
                         Continue
                     </button>
                 </div>
@@ -164,10 +221,14 @@
                         <span class="font-medium">Access URL:</span>
                         <span id="confirm-url" class="text-blue-600 font-mono text-sm"></span>
                     </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium">Volumes Path:</span>
+                        <span id="confirm-volumes" class="text-gray-600 font-mono text-sm"></span>
+                    </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <button onclick="prevStep(3)" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
+                    <button onclick="prevStep('3')" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
                         Back
                     </button>
                     <button id="complete-btn" onclick="completeSetup()" class="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
@@ -179,18 +240,20 @@
     </div>
 
     <script>
-        let currentStep = 1;
+        let currentStep = '1';
 
         function nextStep(step) {
-            if (step === 3 && !validateAdminForm()) return;
-            if (step === 4 && !validateNetworkForm()) return;
-            if (step === 4) updateConfirmation();
+            if (step === '3' && !validateAdminForm()) return;
+            if (step === '4' && !validateNetworkForm()) return;
+            if (step === '4') updateConfirmation();
 
             document.getElementById(`step-${currentStep}`).classList.add('hidden');
             document.getElementById(`step-${step}`).classList.remove('hidden');
             
             updateStepIndicators(currentStep, step);
             currentStep = step;
+            
+            if (step === '1b') loadVolumesPath();
         }
 
         function prevStep(step) {
@@ -202,11 +265,11 @@
         }
 
         function updateStepIndicators(from, to) {
-            document.getElementById(`step-${from}-indicator`).querySelector('div').classList.remove('bg-blue-600');
-            document.getElementById(`step-${from}-indicator`).querySelector('div').classList.add('bg-gray-300');
+            document.getElementById(`step-${from}-indicator`)?.querySelector('div').classList.remove('bg-blue-600');
+            document.getElementById(`step-${from}-indicator`)?.querySelector('div').classList.add('bg-gray-300');
             
-            document.getElementById(`step-${to}-indicator`).querySelector('div').classList.remove('bg-gray-300');
-            document.getElementById(`step-${to}-indicator`).querySelector('div').classList.add('bg-blue-600');
+            document.getElementById(`step-${to}-indicator`)?.querySelector('div').classList.remove('bg-gray-300');
+            document.getElementById(`step-${to}-indicator`)?.querySelector('div').classList.add('bg-blue-600');
         }
 
         async function validateSystem() {
@@ -244,6 +307,29 @@
                 results.innerHTML = `<div class="flex items-center text-red-600">Validation failed: ${error.message}</div>`;
                 btn.textContent = 'Retry Validation';
                 btn.disabled = false;
+            }
+        }
+
+        async function loadVolumesPath() {
+            try {
+                const response = await fetch('/api/config/volumes-path');
+                const data = await response.json();
+                
+                const pathEl = document.getElementById('current-volumes-path');
+                const statusEl = document.getElementById('volumes-status');
+                
+                pathEl.textContent = data.path || '/volumes/supos/data';
+                
+                if (data.mounted && data.writable) {
+                    statusEl.innerHTML = '<span class="text-green-600">✓ Mounted and writable</span>';
+                } else if (data.writable) {
+                    statusEl.innerHTML = '<span class="text-yellow-600">⚠ Path exists but may not be mounted</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="text-red-600">✗ Not writable - check permissions</span>';
+                }
+            } catch (e) {
+                document.getElementById('current-volumes-path').textContent = '/volumes/supos/data (default)';
+                document.getElementById('volumes-status').innerHTML = '<span class="text-gray-500">Unable to verify status</span>';
             }
         }
 
@@ -296,6 +382,7 @@
             const domain = document.getElementById('network-domain').value;
             const port = document.getElementById('network-port').value;
             document.getElementById('confirm-url').textContent = `http://${domain}:${port}`;
+            document.getElementById('confirm-volumes').textContent = document.getElementById('current-volumes-path').textContent;
         }
 
         async function completeSetup() {

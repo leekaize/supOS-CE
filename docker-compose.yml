@@ -8,19 +8,29 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      # Docker socket for inspecting containers
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+      # Orchestrator persistent config
       - orchestrator_config:/app/config
-      - ./services:/services
+      
+      # CRITICAL: Mount entire workspace (contains bin/, .env, docker-compose files)
       - .:/workspace
+      
+      # CRITICAL: Mount user's VOLUMES_PATH to same location as host
+      # This makes install script see volumes at expected path
+      - ${VOLUMES_PATH}:${VOLUMES_PATH}
     environment:
       - FLASK_ENV=production
       - SUPOS_WORKSPACE=/workspace
+      # Pass VOLUMES_PATH to orchestrator for validation
+      - VOLUMES_PATH=${VOLUMES_PATH}
     networks:
-      - supos-bedrock
+      - supos_orchestrator_network
 
 networks:
-  supos-bedrock:
-    name: supos-bedrock
+  supos_orchestrator_network:
+    name: supos_orchestrator_network
     driver: bridge
 
 volumes:

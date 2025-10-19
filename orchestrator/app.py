@@ -60,6 +60,25 @@ def validate_setup():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/config/volumes-path", methods=["GET"])
+def get_volumes_path():
+    """Return current VOLUMES_PATH for UI display."""
+    try:
+        config = setup_wizard.load_config()
+        path = config.get('system', {}).get('volumes_path', os.getenv('VOLUMES_PATH', '/volumes/supos/data'))
+        
+        # Verify path is actually mounted
+        is_mounted = os.path.exists(path) and os.path.ismount(path)
+        
+        return jsonify({
+            "path": path,
+            "mounted": is_mounted,
+            "writable": os.access(path, os.W_OK) if os.path.exists(path) else False
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/setup/complete", methods=["POST"])
 def complete_setup():
     """Save configuration."""
@@ -81,13 +100,17 @@ def complete_setup():
         config['network']['port'] = network_data.get('port')
         config['localization']['language'] = data.get('language', 'en-US')
         
-        # Service passwords
+        # Service passwords (generate for non-admin services)
         passwords = setup_wizard.generate_service_passwords()
         config['services']['postgres']['password'] = passwords['postgres']
-        config['services']['keycloak']['admin_password'] = passwords['keycloak_admin']
         config['services']['emqx']['admin_password'] = passwords['emqx_admin']
         config['services']['minio']['secret_key'] = passwords['minio_secret']
         config['services']['kong']['db_password'] = passwords['kong_db']
+        
+        # CRITICAL: Sync admin credentials to Keycloak AFTER password generation
+        # This prevents overwriting with random password
+        config['services']['keycloak']['admin_username'] = admin_data.get('username')
+        config['services']['keycloak']['admin_password'] = admin_data.get('password')
         
         # Validate volumes path
         valid, message = setup_wizard.validate_volumes_path(config['system']['volumes_path'])
@@ -99,7 +122,7 @@ def complete_setup():
         # Generate .env in workspace root
         success, msg = setup_wizard.generate_env_file(
             config,
-            template_path='/services/.env.template',
+            template_path='/app/templates/.env.template',
             output_path=f'{SUPOS_WORKSPACE}/.env'
         )
         if not success:
@@ -122,6 +145,24 @@ def dashboard():
 
 
 # ==================== SUPOS-CE ====================
+
+@app.route("/api/debug/config", methods=["GET"])
+def debug_config():
+    """Debug endpoint: dump current config state."""
+    try:
+        config = setup_wizard.load_config()
+        return jsonify({
+            "setup_complete": config.get("setup_complete", False),
+            "installation_complete": config.get("installation_complete", False),
+            "config_file_exists": os.path.exists(setup_wizard.CONFIG_FILE),
+            "config_file_path": setup_wizard.CONFIG_FILE,
+            "volumes_path": config.get("system", {}).get("volumes_path"),
+            "admin_username": config.get("admin", {}).get("username"),
+            "keycloak_admin": config.get("services", {}).get("keycloak", {}).get("admin_username")
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/supos/status")
 def supos_status():
@@ -182,6 +223,17 @@ def install_supos():
             
             # Environment to bypass ALL interactive prompts
             env = os.environ.copy()
+            
+            # Convert resource_spec to numeric format for install script
+            resource_spec = config['system']['resource_spec']
+            if resource_spec == '4c8g':
+                numeric_spec = '1'
+            elif resource_spec == '8c16g':
+                numeric_spec = '2'
+            else:
+                # Fallback if already numeric
+                numeric_spec = resource_spec
+            
             env.update({
                 # Network config (answers IP selection prompt)
                 'ENTRANCE_DOMAIN': config['network']['domain'],
@@ -191,7 +243,7 @@ def install_supos():
                 # System config
                 'VOLUMES_PATH': config['system']['volumes_path'],
                 'OS_PLATFORM_TYPE': config['system']['platform_type'],
-                'OS_RESOURCE_SPEC': '1' if config['system']['resource_spec'] == '4c8g' else '2',
+                'OS_RESOURCE_SPEC': numeric_spec,
                 
                 # Localization
                 'LANGUAGE': config['localization']['language'],
@@ -204,6 +256,12 @@ def install_supos():
                 # User can add profile selection to wizard later
                 'SERVICE_PROFILE': 'base',
             })
+            
+            # Verify VOLUMES_PATH is accessible
+            volumes_path = config['system']['volumes_path']
+            if not os.path.exists(volumes_path):
+                yield f'data: {{"type": "error", "message": "VOLUMES_PATH not mounted: {volumes_path}"}}\n\n'
+                return
             
             yield f'data: {{"type": "info", "message": "Calling bin/install.sh..."}}\n\n'
             
@@ -233,19 +291,40 @@ def install_supos():
             process.stdin.write(stdin_answers)
             process.stdin.close()
             
+            import time
+            last_output = time.time()
+            
             for line in iter(process.stdout.readline, ''):
                 if line:
                     clean = line.strip().replace('"', '\\"').replace('\n', '')
                     yield f'data: {{"type": "log", "message": "{clean}"}}\n\n'
+                    last_output = time.time()
+                else:
+                    # No output for 5 seconds, send keep-alive
+                    if time.time() - last_output > 5:
+                        yield f'data: {{"type": "heartbeat"}}\n\n'
+                        last_output = time.time()
+                        time.sleep(1)
             
             process.wait()
             
             if process.returncode == 0:
+                # Wait 2 seconds for containers to stabilize
+                yield f'data: {{"type": "info", "message": "Finalizing installation..."}}\n\n'
+                import time
+                time.sleep(2)
+                
+                # Mark complete and persist immediately
                 config['installation_complete'] = True
                 setup_wizard.save_config(config)
                 
-                yield f'data: {{"type": "success", "message": "Installation complete"}}\n\n'
-                yield f'data: {{"type": "complete"}}\n\n'
+                # Verify persistence
+                verify_config = setup_wizard.load_config()
+                if verify_config.get('installation_complete'):
+                    yield f'data: {{"type": "success", "message": "Installation complete"}}\n\n'
+                    yield f'data: {{"type": "complete"}}\n\n'
+                else:
+                    yield f'data: {{"type": "error", "message": "Failed to persist installation status"}}\n\n'
             else:
                 yield f'data: {{"type": "error", "message": "Failed code {process.returncode}"}}\n\n'
                 

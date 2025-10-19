@@ -28,12 +28,71 @@
                     </div>
 
                     <div id="install-progress" class="hidden">
+                        <!-- Progress Steps -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <div id="phase-prep" class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">Preparation</span>
+                                </div>
+                                <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
+                                <div id="phase-pull" class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">Pulling Images</span>
+                                </div>
+                                <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
+                                <div id="phase-start" class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">Starting Services</span>
+                                </div>
+                                <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
+                                <div id="phase-init" class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">Initialization</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Console Output -->
                         <div class="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto font-mono text-xs mb-4">
                             <div id="install-logs" class="text-green-400 space-y-1"></div>
                         </div>
-                        <button onclick="location.reload()" class="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
-                            Refresh Dashboard
-                        </button>
+
+                        <!-- Action Buttons -->
+                        <div id="install-actions" class="flex gap-3 hidden">
+                            <button onclick="location.reload()" class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 font-semibold">
+                                Go to Dashboard
+                            </button>
+                            <button onclick="viewLogs()" class="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700">
+                                View Full Logs
+                            </button>
+                        </div>
+
+                        <div id="install-error-actions" class="flex gap-3 hidden">
+                            <button onclick="location.reload()" class="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700">
+                                Refresh Dashboard
+                            </button>
+                            <button onclick="showRetryOptions()" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700">
+                                Troubleshoot
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,16 +110,27 @@
                     </div>
                 </div>
 
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Access supOS</h2>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-gray-700 mb-2">Platform URL:</p>
+                        <a id="platform-url" href="#" target="_blank" class="text-blue-600 hover:text-blue-700 font-mono text-lg font-semibold">
+                            Loading...
+                        </a>
+                        <p class="text-sm text-gray-600 mt-3">Default credentials: <code class="bg-white px-2 py-1 rounded">supos / supos</code></p>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h2 class="text-xl font-semibold mb-4">Controls</h2>
-                    <div class="flex gap-3">
-                        <button onclick="manage('start')" class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700">
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="manage('start')" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700">
                             Start
                         </button>
-                        <button onclick="manage('stop')" class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700">
+                        <button onclick="manage('stop')" class="bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700">
                             Stop
                         </button>
-                        <button onclick="manage('restart')" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700">
+                        <button onclick="manage('restart')" class="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700">
                             Restart
                         </button>
                     </div>
@@ -70,19 +140,41 @@
     </div>
 
     <script>
+        let currentPhase = 'prep';
+        let installComplete = false;
+
         async function checkStatus() {
             try {
                 const res = await fetch('/api/supos/status');
                 const data = await res.json();
 
-                if (data.configured && data.installation_complete) {
+                console.log('Status check:', data);  // Debug visibility
+
+                // Check if installation is complete
+                // 'configured' field contains installation_complete flag
+                if (data.installed && data.configured) {
                     showMonitoring();
                     updateStatus(data);
+                    loadPlatformUrl();
                 } else {
                     showInstall();
                 }
             } catch (e) {
+                console.error('Status check failed:', e);
                 showInstall();
+            }
+        }
+
+        async function loadPlatformUrl() {
+            try {
+                const res = await fetch('/api/config/volumes-path');
+                const data = await res.json();
+                // Construct URL from config
+                const url = 'http://localhost:8088/home'; // Update with actual config
+                document.getElementById('platform-url').href = url;
+                document.getElementById('platform-url').textContent = url;
+            } catch (e) {
+                document.getElementById('platform-url').textContent = 'http://localhost:8088/home';
             }
         }
 
@@ -99,7 +191,7 @@
         function updateStatus(data) {
             const el = document.getElementById('stack-status');
             if (data.running) {
-                el.textContent = `${data.running_count}/${data.container_count} running`;
+                el.textContent = `${data.running_count}/${data.container_count} containers running`;
                 el.className = 'text-green-600 font-medium';
             } else {
                 el.textContent = 'Services stopped';
@@ -112,6 +204,41 @@
             updateStatus(await res.json());
         }
 
+        function markPhaseActive(phase) {
+            const phases = ['prep', 'pull', 'start', 'init'];
+            phases.forEach(p => {
+                const el = document.getElementById(`phase-${p}`);
+                if (!el) return;
+                
+                if (p === phase) {
+                    el.classList.remove('text-gray-400');
+                    el.classList.add('text-blue-600');
+                    el.querySelector('div').classList.remove('bg-gray-300');
+                    el.querySelector('div').classList.add('bg-blue-600', 'text-white');
+                    
+                    // Add spinner to active phase
+                    const svg = el.querySelector('svg');
+                    svg.classList.add('animate-spin');
+                }
+            });
+            currentPhase = phase;
+        }
+
+        function markPhaseComplete(phase) {
+            const el = document.getElementById(`phase-${phase}`);
+            if (!el) return;
+            
+            el.classList.remove('text-blue-600', 'text-gray-400');
+            el.classList.add('text-green-600');
+            el.querySelector('div').classList.remove('bg-blue-600', 'bg-gray-300');
+            el.querySelector('div').classList.add('bg-green-600', 'text-white');
+            
+            // Remove spinner, add checkmark
+            const svg = el.querySelector('svg');
+            svg.classList.remove('animate-spin');
+            svg.innerHTML = '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>';
+        }
+
         function install() {
             const btn = document.getElementById('install-button-container');
             const progress = document.getElementById('install-progress');
@@ -122,62 +249,124 @@
             const logs = document.getElementById('install-logs');
             const eventSource = new EventSource('/api/supos/install');
             
-            let currentPhase = 'config';
+            markPhaseActive('prep');
+            let lastLogTime = Date.now();
+            let heartbeatTimer;
+
+            // Heartbeat to detect stalls
+            heartbeatTimer = setInterval(() => {
+                if (Date.now() - lastLogTime > 60000 && !installComplete) {
+                    logs.innerHTML += '<div class="text-yellow-400">⚠ Installation in progress. Large images take time...</div>';
+                    lastLogTime = Date.now();
+                }
+            }, 30000);
+            
+            // Keep-alive ping every 15 seconds to prevent SSE timeout
+            const keepAliveTimer = setInterval(() => {
+                if (!installComplete) {
+                    // Send comment to keep connection alive
+                    logs.innerHTML += '<div class="text-gray-500">...</div>';
+                }
+            }, 15000);
             
             eventSource.onmessage = function(event) {
+                lastLogTime = Date.now();
                 const data = JSON.parse(event.data);
                 const msg = data.message || '';
                 
+                // Ignore heartbeat pings
+                if (data.type === 'heartbeat') {
+                    return;
+                }
+                
                 if (data.type === 'complete') {
                     eventSource.close();
-                    logs.innerHTML += '<div class="text-white">✓ Installation complete. Refreshing...</div>';
-                    setTimeout(() => location.reload(), 2000);
+                    clearInterval(heartbeatTimer);
+                    installComplete = true;
+                    
+                    markPhaseComplete('init');
+                    logs.innerHTML += '<div class="text-white font-bold">✓ Installation complete!</div>';
+                    document.getElementById('install-actions').classList.remove('hidden');
                     return;
                 }
 
                 if (data.type === 'error') {
                     eventSource.close();
-                    logs.innerHTML += `<div class="text-red-400">✗ Error: ${msg}</div>`;
+                    clearInterval(heartbeatTimer);
+                    logs.innerHTML += `<div class="text-red-400 font-bold">✗ Error: ${msg}</div>`;
+                    document.getElementById('install-error-actions').classList.remove('hidden');
                     return;
                 }
 
-                // Phase detection based on bin/install.sh output
-                if (currentPhase === 'config') {
-                    if (msg.includes('Installing Docker') || msg.includes('docker compose') || 
-                        msg.includes('Pulling') || msg.includes('pull')) {
-                        currentPhase = 'pull';
-                        markStepComplete('config');
-                        markStepActive('pull');
+                // Phase detection with lowercase matching
+                const lower = msg.toLowerCase();
+                
+                if (currentPhase === 'prep') {
+                    if (lower.includes('pull') || lower.includes('download') || 
+                        lower.includes('creating volumes') || lower.includes('start creating')) {
+                        markPhaseComplete('prep');
+                        markPhaseActive('pull');
                     }
                 }
                 
                 if (currentPhase === 'pull') {
-                    if (msg.includes('Creating') || msg.includes('Starting') || 
-                        msg.includes('started') || msg.includes('Container')) {
-                        currentPhase = 'start';
-                        markStepComplete('pull');
-                        markStepActive('start');
+                    if (lower.includes('creating') || lower.includes('starting') || 
+                        lower.includes('container') || lower.includes('up -d') ||
+                        lower.includes('started successfully')) {
+                        markPhaseComplete('pull');
+                        markPhaseActive('start');
                     }
                 }
 
-                logs.innerHTML += `<div>> ${msg}</div>`;
+                if (currentPhase === 'start') {
+                    if (lower.includes('waiting') || lower.includes('healthy') || 
+                        lower.includes('init') || lower.includes('services are up') ||
+                        lower.includes('all services')) {
+                        markPhaseComplete('start');
+                        markPhaseActive('init');
+                    }
+                }
+
+                // Log output
+                const logLine = `<div>> ${msg}</div>`;
+                logs.innerHTML += logLine;
                 logs.parentElement.scrollTop = logs.parentElement.scrollHeight;
             };
-            
-            function markStepActive(step) {
-                const steps = {config: 1, pull: 2, start: 3};
-                const el = document.getElementById(`step-${step}`);
-                if (!el) return;
-                el.classList.remove('opacity-50');
-                el.querySelector('.text-gray-600').textContent = step.charAt(0).toUpperCase() + step.slice(1) + 'ing...';
-            }
-            
-            function markStepComplete(step) {
-                const el = document.getElementById(`step-${step}`);
-                if (!el) return;
-                el.classList.remove('opacity-50');
-                el.querySelector('.text-gray-500').textContent = 'Complete';
-            }
+
+            eventSource.onerror = function(error) {
+                clearInterval(heartbeatTimer);
+                
+                if (!installComplete) {
+                    logs.innerHTML += '<div class="text-yellow-400">⚠ Connection interrupted. Reconnecting...</div>';
+                    
+                    // Close old connection
+                    eventSource.close();
+                    
+                    // Wait 3 seconds, check status
+                    setTimeout(async () => {
+                        try {
+                            const res = await fetch('/api/supos/status');
+                            const data = await res.json();
+                            
+                            if (data.installed && data.configured) {
+                                // Installation actually completed
+                                logs.innerHTML += '<div class="text-green-400">✓ Installation completed while reconnecting!</div>';
+                                installComplete = true;
+                                document.getElementById('install-actions').classList.remove('hidden');
+                            } else {
+                                // Still installing, show status
+                                logs.innerHTML += '<div class="text-gray-400">Status: ' + 
+                                    data.running_count + '/' + data.container_count + ' containers running</div>';
+                                logs.innerHTML += '<div class="text-gray-400">Installation continues in background. Check Docker logs if needed.</div>';
+                                document.getElementById('install-error-actions').classList.remove('hidden');
+                            }
+                        } catch (e) {
+                            logs.innerHTML += '<div class="text-red-400">✗ Cannot reach orchestrator API</div>';
+                            document.getElementById('install-error-actions').classList.remove('hidden');
+                        }
+                    }, 3000);
+                }
+            };
         }
 
         async function manage(action) {
@@ -196,6 +385,14 @@
             } catch (e) {
                 alert(`Error: ${e.message}`);
             }
+        }
+
+        function viewLogs() {
+            alert('Full log viewer coming soon. Check Docker logs: docker compose logs -f');
+        }
+
+        function showRetryOptions() {
+            alert('Troubleshooting:\n1. Check Docker logs: docker compose logs\n2. Verify disk space: df -h\n3. Check permissions on VOLUMES_PATH\n4. Try: docker compose down && docker compose up -d');
         }
 
         checkStatus();
