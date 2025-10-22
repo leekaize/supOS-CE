@@ -10,6 +10,26 @@
 
 ---
 
+## 🔧 supOS-bedrock: Open Foundation for Industrial Platforms
+
+> [!important]
+> **This is a platform reimagining of supOS-CE.**  
+> Think Nextcloud AIO for industrial systems—install the core, choose your apps.
+
+**What's Different:**
+- ✅ **Setup wizard** → Zero manual config. Admin created via UI.
+- ✅ **Modular apps** → Install Grafana, MinIO, ELK post-deployment
+- ✅ **Integrated app store** → Add capabilities without reinstall
+- ✅ **One-click updates** → Version management from UI
+- ✅ **Automated backups** → Database exports + config snapshots
+
+**Philosophy:** Nextcloud did it for file sharing. We're doing it for industrial data.
+
+**Status:** Hackathon prototype (7-day sprint)  
+**Docs:** [Sprint Plan](./docs/HACKATHON-SPRINT.md) | [Architecture Decisions](./docs/ADR.md)
+
+---
+
 ## Architecture Overview
 <img width="750" src="./image/function_update.png" />
 
