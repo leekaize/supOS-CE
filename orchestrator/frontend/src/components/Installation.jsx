@@ -3,14 +3,14 @@ import { Button, Typography, Steps, Alert, Spin, Progress } from 'antd';
 import { CheckCircleOutlined, LoadingOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 import { API_BASE } from '../config';
 
 const installSteps = [
-  { key: 'volumes', title: 'Initialize Volumes' },
-  { key: 'containers', title: 'Start Services' },
-  { key: 'postinit', title: 'Configure Services' }
+  { key: 'config', title: 'Configuration' },
+  { key: 'install', title: 'Installation' },
+  { key: 'verify', title: 'Verification' }
 ];
 
 function Installation({ adminData, selectedApps, onComplete, onBack }) {
@@ -30,61 +30,55 @@ function Installation({ adminData, selectedApps, onComplete, onBack }) {
 
   const startInstallation = async () => {
     try {
-      // Step 1: Save configuration & start installation
-      addLog('Starting installation...');
+      setCurrentStep(0);
+      addLog('Preparing configuration...');
       setProgress(10);
+      
+      // Single API call - runs full install.sh in non-interactive mode
+      addLog('Starting installation (this takes 3-5 minutes)...');
       
       const installResponse = await axios.post(`${API_BASE}/install/start`, {
         selected_apps: selectedApps,
-        admin: adminData  // Pass admin credentials
+        admin: adminData,
+        network: {
+          domain: window.location.hostname,
+          port: 8088
+        }
       });
 
       if (!installResponse.data.success) {
         throw new Error(installResponse.data.error || 'Installation failed');
       }
 
-      addLog('✓ Containers started successfully', 'success');
+      // Stream logs from install.sh
+      const backendLogs = installResponse.data.logs || [];
+      backendLogs.forEach(log => {
+        if (log.includes('✓') || log.includes('successfully')) {
+          addLog(log, 'success');
+        } else if (log.includes('[ERROR]') || log.includes('Failed')) {
+          addLog(log, 'error');
+        } else if (log.includes('[WARN]')) {
+          addLog(log, 'warning');
+        } else {
+          addLog(log);
+        }
+      });
+
       setCurrentStep(1);
-      setProgress(50);
-
-      // Step 2: Wait for Keycloak to be ready
-      addLog('Waiting for Keycloak to initialize (60s)...');
-      await new Promise(resolve => setTimeout(resolve, 60000));
-
-      setCurrentStep(2);
       setProgress(70);
 
-      // Step 3: Create Keycloak admin
-      // addLog('Creating Keycloak admin user...');
-      
-      // const keycloakResponse = await axios.post(`${API_BASE}/keycloak/create-admin`, {
-      //   username: adminData.username,
-      //   password: adminData.password,
-      //   email: adminData.email
-      // });
-
-      // if (!keycloakResponse.data.success) {
-      //   // Non-fatal - containers are running
-      //   addLog(`⚠ Keycloak admin creation failed: ${keycloakResponse.data.error}`, 'warning');
-      //   addLog('You can login with default credentials: supos/supos');
-      // } else {
-      //   addLog(`✓ Admin user created: ${adminData.username}`, 'success');
-      // }
-
-      setCurrentStep(3);
-      setProgress(90);
-
-      // Step 4: Verify health
-      addLog('Verifying service health...');
+      // Verify containers
+      addLog('Verifying container health...');
       await monitorContainers();
 
-      addLog('✓ Installation complete!', 'success');
+      setCurrentStep(2);
       setProgress(100);
       setStatus('success');
       
-      setTimeout(() => {
-        onComplete();
-      }, 2000);
+      addLog('✓ Installation complete!', 'success');
+      addLog('Login at: supos / supos', 'success');
+      
+      setTimeout(() => onComplete(), 2000);
 
     } catch (err) {
       setStatus('error');
@@ -102,7 +96,7 @@ function Installation({ adminData, selectedApps, onComplete, onBack }) {
         const response = await axios.get(`${API_BASE}/install/status`);
         const containers = response.data.containers || [];
         
-        const running = containers.filter(c => c.status.includes('running')).length;
+        const running = containers.filter(c => c.status.toLowerCase().includes('running')).length;
         const total = containers.length;
         
         if (running > 0) {
@@ -166,7 +160,7 @@ function Installation({ adminData, selectedApps, onComplete, onBack }) {
       }}>
         {logs.map((log, idx) => (
           <div key={idx} style={{ 
-            color: log.type === 'error' ? '#f00' : log.type === 'success' ? '#0f0' : '#fff',
+            color: log.type === 'error' ? '#f00' : log.type === 'success' ? '#0f0' : log.type === 'warning' ? '#ff0' : '#fff',
             marginBottom: 4
           }}>
             [{new Date(log.timestamp).toLocaleTimeString()}] {log.message}

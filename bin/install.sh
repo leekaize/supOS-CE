@@ -2,26 +2,67 @@
 
 set -e
 
+# --- Detect non-interactive mode ---
+NON_INTERACTIVE=false
+if [[ "$1" == "--non-interactive" ]]; then
+    NON_INTERACTIVE=true
+    shift
+fi
+
 # --- 1. Initialization ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-sed -i 's/\r$//' "$SCRIPT_DIR/../.env" # Clean .env file
-source "$SCRIPT_DIR/../.env"          # Load initial environment variables
+sed -i 's/\r$//' "$SCRIPT_DIR/../.env"
+source "$SCRIPT_DIR/../.env"
 source "$SCRIPT_DIR/global/log.sh"
 source "$SCRIPT_DIR/global/choose-profile-command.sh"
 platform=$(uname -s)
 info "Starting installation on platform: $platform"
 echo
 
-# --- 2. Configuration Setup (sourcing from /util) ---
+# --- 2. Configuration Setup ---
 source "$SCRIPT_DIR/util/handle-volumes-path.sh"
-source "$SCRIPT_DIR/util/select-ip-address.sh"
+
+# IP selection: skip if non-interactive and ENTRANCE_DOMAIN already set
+if [[ "$NON_INTERACTIVE" == true ]]; then
+    info "Non-interactive mode: using ENTRANCE_DOMAIN=$ENTRANCE_DOMAIN"
+else
+    source "$SCRIPT_DIR/util/select-ip-address.sh"
+fi
 
 # --- 3. Dependency Installation ---
 source "$SCRIPT_DIR/deb/install-docker.sh"
 
 # --- 4. Service Profile Selection ---
-# This script will set the 'command' variable for docker-compose
-source "$SCRIPT_DIR/util/select-service-profile.sh"
+if [[ "$NON_INTERACTIVE" == true ]]; then
+    # Read profiles from orchestrator selection
+    SELECTED_PROFILES=${SELECTED_PROFILES:-"grafana"}
+    info "Non-interactive mode: selected profiles=$SELECTED_PROFILES"
+    
+    # Convert to profile args
+    profileCommand=""
+    activeServices="emqx,nodered,keycloak,kong,postgresql,chat2db,portainer,tsdb"
+    
+    IFS=',' read -ra PROFILES <<< "$SELECTED_PROFILES"
+    for profile in "${PROFILES[@]}"; do
+        profileCommand+="--profile $profile "
+        activeServices+=",$profile"
+    done
+    
+    # Save to active-services.txt
+    OUTPUT_FILE=$SCRIPT_DIR/global/active-services.txt
+    mkdir -p "$(dirname "$OUTPUT_FILE")"
+    echo "$activeServices" > "$OUTPUT_FILE"
+    echo "$profileCommand" >> "$OUTPUT_FILE"
+    
+    # Set COMPOSE_PROFILE_ARGS for docker compose
+    COMPOSE_PROFILE_ARGS=()
+    for profile in "${PROFILES[@]}"; do
+        COMPOSE_PROFILE_ARGS+=("--profile" "$profile")
+    done
+else
+    # Interactive mode: original behavior
+    source "$SCRIPT_DIR/util/select-service-profile.sh"
+fi
 
 # --- 5. Pre-run Initialization ---
 source "$SCRIPT_DIR/util/set-temp-env.sh" "$SCRIPT_DIR/../" "${COMPOSE_PROFILE_ARGS[@]}"
@@ -35,7 +76,6 @@ fi
 
 # --- 6. Volume and Image Management ---
 echo "Start creating volumes"
-# Check for a specific sub-directory to reliably detect an existing installation.
 if [ -d "$VOLUMES_PATH/postgresql" ]; then
   info "Existing installation detected. Stopping services and updating volumes..."
   source "$SCRIPT_DIR/stop.sh"
@@ -45,7 +85,7 @@ else
   source "$SCRIPT_DIR/init/init-volumes.sh"
 fi
 
-# After volumes are created, copy the service config file to its final destination.
+# Copy active-services.txt to final destination
 SOURCE_CONFIG_FILE="$SCRIPT_DIR/global/active-services.txt"
 FINAL_CONFIG_FILE="$VOLUMES_PATH/backend/system/active-services.txt"
 if [ -f "$SOURCE_CONFIG_FILE" ]; then
@@ -58,7 +98,7 @@ if [ -d "$SCRIPT_DIR/../images/" ] && [ "$(ls -A "$SCRIPT_DIR/../images/")" ]; t
   source "$SCRIPT_DIR/util/load-images.sh"
 fi
 
-# --- 7. Main Execution: Start services and run post-init scripts ---
+# --- 7. Main Execution ---
 info "Starting Docker containers in detached mode..."
 if ! docker compose --env-file "$SCRIPT_DIR/../.env" --env-file "$SCRIPT_DIR/../.env.tmp" --project-name supos "${COMPOSE_PROFILE_ARGS[@]}" -f "$DOCKER_COMPOSE_FILE" up -d; then
     error "Failed to start Docker containers. Please check the logs above."
@@ -67,7 +107,7 @@ fi
 info "Containers started successfully. Waiting for services to become healthy..."
 echo
 
-# Run each initialization script individually for clearer error reporting
+# --- 8. Post-init ---
 {
     source "$SCRIPT_DIR/init/init-nodered.sh"  && \
     source "$SCRIPT_DIR/init/init-eventflow.sh"  && \
@@ -79,7 +119,7 @@ echo
     exit 1
 }
 
-# --- 8. Success ---
+# --- 9. Success ---
 echo -e "\n============================================================"
 echo -e "🎉  All services are up and running!"
 echo -e "👉  Open the platform in your browser:\n"

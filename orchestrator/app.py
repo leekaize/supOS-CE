@@ -153,16 +153,12 @@ def start_installation():
         admin_data = data.get('admin', {})
         network_data = data.get('network', {})
         
-        logs.append(f"Starting: apps={selected_apps}")
+        logs.append(f"Starting installation: apps={selected_apps}")
         
-        if not all(k in admin_data for k in ['username', 'email', 'password']):
-            return jsonify({"success": False, "error": "Missing admin data", "logs": logs}), 400
-        
-        # Write collected data to .env BEFORE running scripts
-        logs.append("Updating .env with setup configuration...")
+        # Write to .env
+        logs.append("Updating configuration...")
         env_file = os.path.join(WORKSPACE, '.env')
         
-        # Read existing .env
         env_vars = {}
         if os.path.exists(env_file):
             with open(env_file, 'r') as f:
@@ -176,58 +172,41 @@ def start_installation():
         updates = {
             'ENTRANCE_DOMAIN': network_data.get('domain', env_vars.get('ENTRANCE_DOMAIN', '127.0.0.1')),
             'ENTRANCE_PORT': str(network_data.get('port', env_vars.get('ENTRANCE_PORT', '8088'))),
-            'KEYCLOAK_ADMIN_USERNAME': admin_data['username'],
-            'KEYCLOAK_ADMIN_PASSWORD': admin_data['password'],
-            'KEYCLOAK_ADMIN_EMAIL': admin_data['email']
+            'SELECTED_PROFILES': ','.join(selected_apps)
         }
         
         env_vars.update(updates)
         
-        # Write back to .env
         with open(env_file, 'w') as f:
             for key, value in env_vars.items():
                 f.write(f'{key}={value}\n')
         
-        logs.append("✓ Configuration updated")
+        logs.append("✓ Configuration saved")
         
-        # Step 1: Volumes
-        logs.append("Creating volumes...")
-        script1 = os.path.join(WORKSPACE, 'bin/wizard/01-init-volumes.sh')
-        result = subprocess.run(['/bin/bash', script1], cwd=WORKSPACE, 
-                               capture_output=True, text=True, timeout=120, env=os.environ.copy())
-        if result.returncode != 0:
-            return jsonify({"success": False, "error": result.stderr, "logs": logs}), 500
-        logs.append("✓ Volumes ready")
+        # Run install.sh in non-interactive mode
+        logs.append("Running installation script...")
+        install_script = os.path.join(WORKSPACE, 'bin/install.sh')
         
-        # Step 2: Containers
-        logs.append("Starting containers...")
-        script2 = os.path.join(WORKSPACE, 'bin/wizard/02-start-containers.sh')
-        profiles = ','.join(selected_apps) if selected_apps else ''
-        result = subprocess.run(['/bin/bash', script2, profiles], cwd=WORKSPACE,
-                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
-        if result.returncode != 0:
-            return jsonify({"success": False, "error": result.stderr, "logs": logs}), 500
-        logs.append("✓ Containers started")
+        result = subprocess.run(
+            ['/bin/bash', install_script, '--non-interactive'],
+            cwd=WORKSPACE,
+            capture_output=True,
+            text=True,
+            timeout=600,
+            env=os.environ.copy()
+        )
         
-        # Step 3: Post-init services
-        logs.append("Initializing services...")
-        script3 = os.path.join(WORKSPACE, 'bin/wizard/04-post-init.sh')
-        result = subprocess.run(['/bin/bash', script3], cwd=WORKSPACE,
-                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
-        if result.returncode != 0:
-            logs.append(f"⚠ Post-init warnings: {result.stderr}")
-        else:
-            logs.append("✓ Services initialized")
+        # Capture output
+        if result.stdout:
+            for line in result.stdout.split('\n'):
+                if line.strip():
+                    logs.append(line)
         
-        # Save state
-        logs.append("Initializing services...")
-        script4 = os.path.join(WORKSPACE, 'bin/wizard/04-post-init.sh')
-        result = subprocess.run(['/bin/bash', script4], cwd=WORKSPACE,
-                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
         if result.returncode != 0:
-            logs.append(f"⚠ Post-init warnings: {result.stderr}")
-        else:
-            logs.append("✓ Services initialized")
+            error_msg = result.stderr or "Installation failed"
+            return jsonify({"success": False, "error": error_msg, "logs": logs}), 500
+        
+        logs.append("✓ Installation complete")
         
         # Save state
         config = load_config()
@@ -239,47 +218,11 @@ def start_installation():
         
         return jsonify({"success": True, "message": "Installation complete", "logs": logs})
         
+    except subprocess.TimeoutExpired:
+        return jsonify({"success": False, "error": "Installation timeout (10 min)", "logs": logs}), 500
     except Exception as e:
         import traceback
         return jsonify({"success": False, "error": str(e), "trace": traceback.format_exc(), "logs": logs}), 500
-
-@app.route('/api/keycloak/create-admin', methods=['POST'])
-def create_keycloak_admin():
-    try:
-        import requests
-        
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        email = data.get('email')
-        
-        keycloak_url = os.getenv('KEYCLOAK_URL', 'http://keycloak:8080')
-        
-        # Get token
-        token_resp = requests.post(f"{keycloak_url}/realms/master/protocol/openid-connect/token",
-            data={'client_id': 'admin-cli', 'username': 'supos', 'password': 'supos', 'grant_type': 'password'},
-            timeout=10)
-        
-        if token_resp.status_code != 200:
-            return jsonify({"success": False, "error": "Token fetch failed"}), 500
-        
-        token = token_resp.json().get('access_token')
-        
-        # Create user
-        user_resp = requests.post(f"{keycloak_url}/admin/realms/supos/users",
-            headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
-            json={"username": username, "email": email, "enabled": True,
-                  "credentials": [{"type": "password", "value": password, "temporary": False}],
-                  "groups": ["/admin"]},
-            timeout=10)
-        
-        if user_resp.status_code in [201, 204, 409]:
-            return jsonify({"success": True, "message": f"Admin {username} created"})
-        
-        return jsonify({"success": False, "error": user_resp.text}), 500
-            
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/install/status')
 def installation_status():
