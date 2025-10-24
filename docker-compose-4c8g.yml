@@ -100,7 +100,7 @@ services:
       - emqx
       - nodered
       - keycloak
-      - chat2db
+      # - chat2db
     networks:
       - default_network
     extra_hosts:

@@ -1,428 +1,334 @@
-import docker
-from flask import Flask, render_template, jsonify, request, redirect, url_for, Response
-import os
-import subprocess
-import setup_wizard
+#!/usr/bin/env python3
+"""supOS-bedrock Orchestrator - Production"""
 
-app = Flask(__name__)
+import os
+import json
+import time
+import subprocess
+import docker
+from datetime import datetime
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
+
+app = Flask(__name__, static_folder='static', static_url_path='')
+CORS(app)
+
+# Paths
+CONFIG_FILE = '/app/config/config.json'
+SETUP_FLAG = '/config/setup_complete'
+WORKSPACE = os.getenv('SUPOS_WORKSPACE', '/workspace')
+
 client = docker.from_env()
 
-SUPOS_WORKSPACE = os.getenv('SUPOS_WORKSPACE', '/workspace')
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            return json.load(f)
+    return {
+        "setup_complete": False,
+        "admin": {},
+        "network": {"domain": os.getenv("ENTRANCE_DOMAIN", "127.0.0.1"), "port": int(os.getenv("ENTRANCE_PORT", 8088))},
+        "system": {"volumes_path": os.getenv("VOLUMES_PATH", "/volumes/supos/data")},
+        "selected_apps": [],
+        "installed_apps": []
+    }
 
+def save_config(config):
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+    with open(CONFIG_FILE, 'w') as f:
+        json.dump(config, f, indent=2)
 
-# ==================== STARTUP ====================
+def is_setup_complete():
+    return os.path.exists(SETUP_FLAG)
 
-def initialize_environment():
-    """Generate .env on startup if configured."""
-    if not setup_wizard.is_first_run():
-        config = setup_wizard.load_config()
-        success, message = setup_wizard.generate_env_file(
-            config,
-            template_path='/app/templates/.env.template',
-            output_path=f'{SUPOS_WORKSPACE}/.env'
-        )
-        if success:
-            print(f"✓ {message}")
-        else:
-            print(f"⚠ {message}")
+def write_setup_flag(config):
+    os.makedirs(os.path.dirname(SETUP_FLAG), exist_ok=True)
+    with open(SETUP_FLAG, 'w') as f:
+        json.dump({
+            "completed_at": datetime.utcnow().isoformat() + "Z",
+            "admin_username": config.get("admin", {}).get("username", "admin"),
+            "installed_apps": config.get("installed_apps", [])
+        }, f, indent=2)
 
-initialize_environment()
+@app.route('/')
+def index():
+    if is_setup_complete():
+        return jsonify({"message": "Setup complete"}), 200
+    return send_from_directory('static', 'index.html')
 
+@app.route('/<path:path>')
+def catch_all(path):
+    if os.path.exists(os.path.join('static', path)):
+        return send_from_directory('static', path)
+    return send_from_directory('static', 'index.html')
 
-# ==================== MIDDLEWARE ====================
+@app.route('/api/health')
+def health():
+    try:
+        containers = client.containers.list()
+        return jsonify({"status": "ok", "setup_complete": is_setup_complete(), "containers": len(containers)})
+    except:
+        return jsonify({"status": "ok", "setup_complete": is_setup_complete(), "containers": 0})
 
-@app.before_request
-def check_first_run():
-    """Redirect to setup if not configured."""
-    if setup_wizard.is_first_run():
-        if request.path.startswith('/setup') or request.path.startswith('/api/setup'):
-            return None
-        return redirect(url_for('setup_page'))
+@app.route('/api/setup/status')
+def setup_status():
+    if is_setup_complete():
+        try:
+            with open(SETUP_FLAG, 'r') as f:
+                return jsonify({**json.load(f), "completed": True})
+        except:
+            return jsonify({"completed": True})
+    return jsonify({"completed": False})
 
-
-# ==================== SETUP ====================
-
-@app.route("/setup")
-def setup_page():
-    """First-run wizard."""
-    if not setup_wizard.is_first_run():
-        return redirect(url_for('dashboard'))
-    return render_template("setup.html")
-
-
-@app.route("/api/setup/validate", methods=["POST"])
+@app.route('/api/setup/validate', methods=['POST'])
 def validate_setup():
-    """System requirements check."""
     try:
-        valid, issues, warnings = setup_wizard.validate_system_requirements()
-        return jsonify({"valid": valid, "issues": issues, "warnings": warnings}), 200
+        issues = []
+        warnings = []
+        
+        try:
+            client.ping()
+        except:
+            issues.append("Docker socket unavailable")
+        
+        volumes_path = os.getenv("VOLUMES_PATH", "/volumes/supos/data")
+        if not os.path.exists(volumes_path):
+            issues.append(f"Volumes path missing: {volumes_path}")
+        
+        return jsonify({"valid": len(issues) == 0, "issues": issues, "warnings": warnings})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"valid": False, "issues": [str(e)], "warnings": []}), 500
 
-
-@app.route("/api/config/volumes-path", methods=["GET"])
+@app.route('/api/config/volumes-path')
 def get_volumes_path():
-    """Return current VOLUMES_PATH for UI display."""
     try:
-        config = setup_wizard.load_config()
-        path = config.get('system', {}).get('volumes_path', os.getenv('VOLUMES_PATH', '/volumes/supos/data'))
-        
-        # Verify path is actually mounted
-        is_mounted = os.path.exists(path) and os.path.ismount(path)
-        
-        return jsonify({
-            "path": path,
-            "mounted": is_mounted,
-            "writable": os.access(path, os.W_OK) if os.path.exists(path) else False
-        }), 200
+        path = os.getenv("VOLUMES_PATH", "/volumes/supos/data")
+        return jsonify({"path": path, "mounted": os.path.exists(path)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@app.route("/api/setup/complete", methods=["POST"])
-def complete_setup():
-    """Save configuration."""
+@app.route('/api/config/update', methods=['POST'])
+def update_config():
     try:
         data = request.get_json()
-        config = setup_wizard.load_config()
+        env_file = os.path.join(WORKSPACE, '.env')
         
-        # Admin user
+        if os.path.exists(env_file):
+            with open(env_file, 'r') as f:
+                lines = f.readlines()
+        else:
+            lines = []
+        
+        updates = {
+            'ENTRANCE_DOMAIN': data.get('ip_address'),
+            'VOLUMES_PATH': data.get('volumes_path'),
+            'OS_RESOURCE_SPEC': data.get('resource_spec', '1')
+        }
+        
+        for key, value in updates.items():
+            if value is None:
+                continue
+            found = False
+            for i, line in enumerate(lines):
+                if line.startswith(f'{key}='):
+                    lines[i] = f'{key}={value}\n'
+                    found = True
+                    break
+            if not found:
+                lines.append(f'{key}={value}\n')
+        
+        with open(env_file, 'w') as f:
+            f.writelines(lines)
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/install/start', methods=['POST'])
+def start_installation():
+    logs = []
+    try:
+        data = request.get_json(force=True)
+        selected_apps = data.get('selected_apps', [])
         admin_data = data.get('admin', {})
-        config['admin'] = setup_wizard.create_admin_user(
-            username=admin_data.get('username'),
-            email=admin_data.get('email'),
-            password=admin_data.get('password')
-        )
-        
-        # Network
         network_data = data.get('network', {})
-        config['network']['domain'] = network_data.get('domain')
-        config['network']['port'] = network_data.get('port')
-        config['localization']['language'] = data.get('language', 'en-US')
         
-        # Service passwords (generate for non-admin services)
-        passwords = setup_wizard.generate_service_passwords()
-        config['services']['postgres']['password'] = passwords['postgres']
-        config['services']['emqx']['admin_password'] = passwords['emqx_admin']
-        config['services']['minio']['secret_key'] = passwords['minio_secret']
-        config['services']['kong']['db_password'] = passwords['kong_db']
+        logs.append(f"Starting: apps={selected_apps}")
         
-        # CRITICAL: Sync admin credentials to Keycloak AFTER password generation
-        # This prevents overwriting with random password
-        config['services']['keycloak']['admin_username'] = admin_data.get('username')
-        config['services']['keycloak']['admin_password'] = admin_data.get('password')
+        if not all(k in admin_data for k in ['username', 'email', 'password']):
+            return jsonify({"success": False, "error": "Missing admin data", "logs": logs}), 400
         
-        # Validate volumes path
-        valid, message = setup_wizard.validate_volumes_path(config['system']['volumes_path'])
-        if not valid:
-            return jsonify({"error": f"Path error: {message}"}), 400
+        # Write collected data to .env BEFORE running scripts
+        logs.append("Updating .env with setup configuration...")
+        env_file = os.path.join(WORKSPACE, '.env')
         
-        setup_wizard.complete_setup(config)
+        # Read existing .env
+        env_vars = {}
+        if os.path.exists(env_file):
+            with open(env_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        env_vars[key] = value
         
-        # Generate .env in workspace root
-        success, msg = setup_wizard.generate_env_file(
-            config,
-            template_path='/app/templates/.env.template',
-            output_path=f'{SUPOS_WORKSPACE}/.env'
-        )
-        if not success:
-            print(f"⚠ {msg}")
+        # Update with orchestrator data
+        updates = {
+            'ENTRANCE_DOMAIN': network_data.get('domain', env_vars.get('ENTRANCE_DOMAIN', '127.0.0.1')),
+            'ENTRANCE_PORT': str(network_data.get('port', env_vars.get('ENTRANCE_PORT', '8088'))),
+            'KEYCLOAK_ADMIN_USERNAME': admin_data['username'],
+            'KEYCLOAK_ADMIN_PASSWORD': admin_data['password'],
+            'KEYCLOAK_ADMIN_EMAIL': admin_data['email']
+        }
         
-        return jsonify({"message": "Setup complete"}), 200
+        env_vars.update(updates)
         
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        # Write back to .env
+        with open(env_file, 'w') as f:
+            for key, value in env_vars.items():
+                f.write(f'{key}={value}\n')
+        
+        logs.append("✓ Configuration updated")
+        
+        # Step 1: Volumes
+        logs.append("Creating volumes...")
+        script1 = os.path.join(WORKSPACE, 'bin/wizard/01-init-volumes.sh')
+        result = subprocess.run(['/bin/bash', script1], cwd=WORKSPACE, 
+                               capture_output=True, text=True, timeout=120, env=os.environ.copy())
+        if result.returncode != 0:
+            return jsonify({"success": False, "error": result.stderr, "logs": logs}), 500
+        logs.append("✓ Volumes ready")
+        
+        # Step 2: Containers
+        logs.append("Starting containers...")
+        script2 = os.path.join(WORKSPACE, 'bin/wizard/02-start-containers.sh')
+        profiles = ','.join(selected_apps) if selected_apps else ''
+        result = subprocess.run(['/bin/bash', script2, profiles], cwd=WORKSPACE,
+                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
+        if result.returncode != 0:
+            return jsonify({"success": False, "error": result.stderr, "logs": logs}), 500
+        logs.append("✓ Containers started")
+        
+        # Step 3: Post-init services
+        logs.append("Initializing services...")
+        script3 = os.path.join(WORKSPACE, 'bin/wizard/04-post-init.sh')
+        result = subprocess.run(['/bin/bash', script3], cwd=WORKSPACE,
+                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
+        if result.returncode != 0:
+            logs.append(f"⚠ Post-init warnings: {result.stderr}")
+        else:
+            logs.append("✓ Services initialized")
+        
+        # Save state
+        logs.append("Initializing services...")
+        script4 = os.path.join(WORKSPACE, 'bin/wizard/04-post-init.sh')
+        result = subprocess.run(['/bin/bash', script4], cwd=WORKSPACE,
+                               capture_output=True, text=True, timeout=300, env=os.environ.copy())
+        if result.returncode != 0:
+            logs.append(f"⚠ Post-init warnings: {result.stderr}")
+        else:
+            logs.append("✓ Services initialized")
+        
+        # Save state
+        config = load_config()
+        config['installed_apps'] = selected_apps
+        config['admin'] = admin_data
+        config['network'] = network_data
+        save_config(config)
+        write_setup_flag(config)
+        
+        return jsonify({"success": True, "message": "Installation complete", "logs": logs})
+        
+    except Exception as e:
+        import traceback
+        return jsonify({"success": False, "error": str(e), "trace": traceback.format_exc(), "logs": logs}), 500
+
+@app.route('/api/keycloak/create-admin', methods=['POST'])
+def create_keycloak_admin():
+    try:
+        import requests
+        
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        email = data.get('email')
+        
+        keycloak_url = os.getenv('KEYCLOAK_URL', 'http://keycloak:8080')
+        
+        # Get token
+        token_resp = requests.post(f"{keycloak_url}/realms/master/protocol/openid-connect/token",
+            data={'client_id': 'admin-cli', 'username': 'supos', 'password': 'supos', 'grant_type': 'password'},
+            timeout=10)
+        
+        if token_resp.status_code != 200:
+            return jsonify({"success": False, "error": "Token fetch failed"}), 500
+        
+        token = token_resp.json().get('access_token')
+        
+        # Create user
+        user_resp = requests.post(f"{keycloak_url}/admin/realms/supos/users",
+            headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+            json={"username": username, "email": email, "enabled": True,
+                  "credentials": [{"type": "password", "value": password, "temporary": False}],
+                  "groups": ["/admin"]},
+            timeout=10)
+        
+        if user_resp.status_code in [201, 204, 409]:
+            return jsonify({"success": True, "message": f"Admin {username} created"})
+        
+        return jsonify({"success": False, "error": user_resp.text}), 500
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/install/status')
+def installation_status():
+    try:
+        containers = client.containers.list(all=True)
+        return jsonify({"containers": [{"name": c.name, "status": c.status} for c in containers]})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/apps/list')
+def list_apps():
+    apps = [
+        {"id": "grafana", "name": "Grafana", "description": "Visualization", "icon": "📊"},
+        {"id": "minio", "name": "MinIO", "description": "Object storage", "icon": "🗄️"},
+        {"id": "portainer", "name": "Portainer", "description": "Container mgmt", "icon": "🐳"},
+        {"id": "chat2db", "name": "Chat2DB", "description": "DB client", "icon": "💬"}
+    ]
+    config = load_config()
+    installed = set(config.get('installed_apps', []))
+    for app in apps:
+        app['installed'] = app['id'] in installed
+    return jsonify({"apps": apps})
 
-# ==================== DASHBOARD ====================
-
-@app.route("/")
-def dashboard():
-    """Main UI."""
-    return render_template("dashboard.html")
-
-
-# ==================== SUPOS-CE ====================
-
-@app.route("/api/debug/config", methods=["GET"])
-def debug_config():
-    """Debug endpoint: dump current config state."""
+@app.route('/api/setup/reset', methods=['POST'])
+def reset_setup():
     try:
-        config = setup_wizard.load_config()
-        return jsonify({
-            "setup_complete": config.get("setup_complete", False),
-            "installation_complete": config.get("installation_complete", False),
-            "config_file_exists": os.path.exists(setup_wizard.CONFIG_FILE),
-            "config_file_path": setup_wizard.CONFIG_FILE,
-            "volumes_path": config.get("system", {}).get("volumes_path"),
-            "admin_username": config.get("admin", {}).get("username"),
-            "keycloak_admin": config.get("services", {}).get("keycloak", {}).get("admin_username")
-        }), 200
+        if os.path.exists(SETUP_FLAG):
+            os.remove(SETUP_FLAG)
+        config = load_config()
+        config['setup_complete'] = False
+        save_config(config)
+        return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
-
-@app.route("/api/supos/status")
-def supos_status():
-    """Check supOS-CE state."""
-    install_script = f"{SUPOS_WORKSPACE}/bin/install.sh"
-    
-    if not os.path.exists(install_script):
-        return jsonify({
-            "installed": False,
-            "configured": False,
-            "message": "supOS-CE scripts not found"
-        }), 200
-    
-    # Check installation completion flag
-    config = setup_wizard.load_config()
-    installation_complete = config.get("installation_complete", False)
-    
-    # Count containers
+@app.route('/api/setup/complete', methods=['POST'])
+def complete_setup():
     try:
-        all_containers = []
-        for name in ["frontend", "backend", "keycloak", "postgresql", "emqx", "tsdb", "nodered", "kong"]:
-            all_containers.extend(client.containers.list(all=True, filters={"name": name}))
-        
-        running = [c for c in all_containers if c.status == "running"]
-        
-        return jsonify({
-            "installed": True,
-            "configured": installation_complete,
-            "running": len(running) > 0,
-            "container_count": len(all_containers),
-            "running_count": len(running)
-        }), 200
+        data = request.get_json()
+        config = load_config()
+        config['admin'] = data.get('admin', {})
+        config['selected_apps'] = data.get('selected_apps', [])
+        config['setup_complete'] = True
+        save_config(config)
+        return jsonify({"success": True})
     except Exception as e:
-        return jsonify({
-            "installed": True,
-            "configured": False,
-            "running": False,
-            "error": str(e)
-        }), 200
+        return jsonify({"success": False, "error": str(e)}), 500
 
-
-@app.route("/api/supos/install", methods=["GET"])
-def install_supos():
-    """Install supOS-CE using bin/install.sh."""
-    
-    def generate():
-        try:
-            install_script = f"{SUPOS_WORKSPACE}/bin/install.sh"
-            
-            if not os.path.exists(install_script):
-                yield f'data: {{"type": "error", "message": "Install script not found"}}\n\n'
-                return
-            
-            yield f'data: {{"type": "info", "message": "Starting installation..."}}\n\n'
-            
-            # Load config for environment variables
-            config = setup_wizard.load_config()
-            
-            # Environment to bypass ALL interactive prompts
-            env = os.environ.copy()
-            
-            # Convert resource_spec to numeric format for install script
-            resource_spec = config['system']['resource_spec']
-            if resource_spec == '4c8g':
-                numeric_spec = '1'
-            elif resource_spec == '8c16g':
-                numeric_spec = '2'
-            else:
-                # Fallback if already numeric
-                numeric_spec = resource_spec
-            
-            env.update({
-                # Network config (answers IP selection prompt)
-                'ENTRANCE_DOMAIN': config['network']['domain'],
-                'ENTRANCE_PORT': str(config['network']['port']),
-                'ENTRANCE_PROTOCOL': config['network']['protocol'],
-                
-                # System config
-                'VOLUMES_PATH': config['system']['volumes_path'],
-                'OS_PLATFORM_TYPE': config['system']['platform_type'],
-                'OS_RESOURCE_SPEC': numeric_spec,
-                
-                # Localization
-                'LANGUAGE': config['localization']['language'],
-                
-                # Skip all prompts
-                'AUTO_INSTALL': 'true',
-                'SKIP_PROMPTS': 'true',
-                
-                # Default to base profile (no optional services)
-                # User can add profile selection to wizard later
-                'SERVICE_PROFILE': 'base',
-            })
-            
-            # Verify VOLUMES_PATH is accessible
-            volumes_path = config['system']['volumes_path']
-            if not os.path.exists(volumes_path):
-                yield f'data: {{"type": "error", "message": "VOLUMES_PATH not mounted: {volumes_path}"}}\n\n'
-                return
-            
-            yield f'data: {{"type": "info", "message": "Calling bin/install.sh..."}}\n\n'
-            
-            # Prepare stdin answers for interactive prompts
-            # Each line answers one prompt in order
-            stdin_answers = "\n".join([
-                "0",      # ENTRANCE_DOMAIN: option 0 (keep current/use env var)
-                "",       # Any other prompts: accept default (empty = Enter)
-                "",
-                "",
-            ]) + "\n"
-            
-            # Run install script with auto-answers
-            process = subprocess.Popen(
-                ["bash", "bin/install.sh"],
-                cwd=SUPOS_WORKSPACE,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-                env=env
-            )
-            
-            # Send answers immediately
-            process.stdin.write(stdin_answers)
-            process.stdin.close()
-            
-            import time
-            last_output = time.time()
-            
-            for line in iter(process.stdout.readline, ''):
-                if line:
-                    clean = line.strip().replace('"', '\\"').replace('\n', '')
-                    yield f'data: {{"type": "log", "message": "{clean}"}}\n\n'
-                    last_output = time.time()
-                else:
-                    # No output for 5 seconds, send keep-alive
-                    if time.time() - last_output > 5:
-                        yield f'data: {{"type": "heartbeat"}}\n\n'
-                        last_output = time.time()
-                        time.sleep(1)
-            
-            process.wait()
-            
-            if process.returncode == 0:
-                # Wait 2 seconds for containers to stabilize
-                yield f'data: {{"type": "info", "message": "Finalizing installation..."}}\n\n'
-                import time
-                time.sleep(2)
-                
-                # Mark complete and persist immediately
-                config['installation_complete'] = True
-                setup_wizard.save_config(config)
-                
-                # Verify persistence
-                verify_config = setup_wizard.load_config()
-                if verify_config.get('installation_complete'):
-                    yield f'data: {{"type": "success", "message": "Installation complete"}}\n\n'
-                    yield f'data: {{"type": "complete"}}\n\n'
-                else:
-                    yield f'data: {{"type": "error", "message": "Failed to persist installation status"}}\n\n'
-            else:
-                yield f'data: {{"type": "error", "message": "Failed code {process.returncode}"}}\n\n'
-                
-        except Exception as e:
-            yield f'data: {{"type": "error", "message": "{str(e)}"}}\n\n'
-    
-    return Response(generate(), mimetype='text/event-stream')
-
-
-@app.route("/api/supos/start", methods=["POST"])
-def start_supos():
-    """Start services using bin/start.sh."""
-    try:
-        result = subprocess.run(
-            ["bash", "bin/start.sh"],
-            cwd=SUPOS_WORKSPACE,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        return jsonify({
-            "message": "Started" if result.returncode == 0 else "Failed",
-            "output": result.stdout or result.stderr
-        }), 200 if result.returncode == 0 else 500
-            
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/supos/stop", methods=["POST"])
-def stop_supos():
-    """Stop services using bin/stop.sh."""
-    try:
-        result = subprocess.run(
-            ["bash", "bin/stop.sh"],
-            cwd=SUPOS_WORKSPACE,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        return jsonify({
-            "message": "Stopped" if result.returncode == 0 else "Failed",
-            "output": result.stdout or result.stderr
-        }), 200 if result.returncode == 0 else 500
-            
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/supos/restart", methods=["POST"])
-def restart_supos():
-    """Restart services (stop + start)."""
-    try:
-        subprocess.run(["bash", "bin/stop.sh"], cwd=SUPOS_WORKSPACE, timeout=30)
-        result = subprocess.run(
-            ["bash", "bin/start.sh"],
-            cwd=SUPOS_WORKSPACE,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        return jsonify({
-            "message": "Restarted" if result.returncode == 0 else "Failed",
-            "output": result.stdout or result.stderr
-        }), 200 if result.returncode == 0 else 500
-            
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/supos/cleanup", methods=["POST"])
-def cleanup_supos():
-    """Clean using bin/clean-all.sh."""
-    try:
-        result = subprocess.run(
-            ["bash", "bin/clean-all.sh", "-f"],
-            cwd=SUPOS_WORKSPACE,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
-        
-        # Reset installation flag
-        config = setup_wizard.load_config()
-        config['installation_complete'] = False
-        setup_wizard.save_config(config)
-        
-        return jsonify({
-            "message": "Cleaned" if result.returncode == 0 else "Failed",
-            "output": result.stdout or result.stderr
-        }), 200 if result.returncode == 0 else 500
-            
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+if __name__ == '__main__':
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+    port = int(os.getenv('ORCHESTRATOR_PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)
