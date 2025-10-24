@@ -24,3 +24,4 @@ images/*.tar
 golioth-websocket-datasource/
 grafana-mqtt-datasource/
 tdengine-datasource/
+.env
