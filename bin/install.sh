@@ -134,3 +134,5 @@ echo -e "      $PLATFORM_URL\n"
 echo -e "    Default user name: supos\n"
 echo -e "            password: supos\n"
 echo -e "============================================================"
+
+exit 0

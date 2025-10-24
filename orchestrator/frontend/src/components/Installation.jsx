@@ -89,7 +89,7 @@ function Installation({ adminData, selectedApps, onComplete, onBack }) {
 
   const monitorContainers = async () => {
     let attempts = 0;
-    const maxAttempts = 30;
+    const maxAttempts = 120;
 
     while (attempts < maxAttempts) {
       try {
